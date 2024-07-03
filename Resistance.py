@@ -1,9 +1,3 @@
-"""
-Implement both with and without air resistance: YES
-Implement basic graph switching: YES
-Implement switching between y vs x, y vs t, vx vs t, and vy vs t: Yes
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RadioButtons
