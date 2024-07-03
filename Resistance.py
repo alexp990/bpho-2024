@@ -1,6 +1,12 @@
+"""
+Implement both with and without air resistance: YES
+Implement basic graph switching: YES
+Implement switching between y vs x, y vs t, vx vs t, and vy vs t: Yes
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
+from matplotlib.widgets import RadioButtons
 
 def k_factor(C_d, rho, cs_area, m):
     return (0.5 * C_d * rho * cs_area) / m
@@ -28,7 +34,7 @@ def with_air_resistance(v0, h, C_d, rho, cs_area, m, angle):
         vx.append(vx[-1] + ax * dt)
         vy.append(vy[-1] + ay * dt)
 
-    return x, y#, vx, vy, t
+    return x, y, v, vx, vy, t
 
 def without_air_resistance(v0, h, angle):
     theta = np.radians(angle) 
@@ -49,7 +55,7 @@ def without_air_resistance(v0, h, angle):
 
         v.append(np.sqrt(vx[-1]**2 + vy[-1]**2))
 
-    return x, y#, v, vx, vy, t
+    return x, y, v, vx, vy, t
    
 g = 9.81  # acceleration due to gravity (m/s^2)
 C_d = 0.1  # Drag coefficient
@@ -61,27 +67,47 @@ v0 = 20  # Initial speed (m/s)
 angle = 30  # Launch angle (deg)
 h = 2 #Initial height
 
-x_no_air, y_no_air = without_air_resistance(v0, h, angle)
-x_with_air, y_with_air = with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)
+xnr, ynr, vnr, vxnr, vynr, tnr  = without_air_resistance(v0, h, angle)
+xr, yr, vr, vxr, vyr, tr = with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)
 
-plt.figure(figsize=(10, 6))
-plt.plot(x_no_air, y_no_air, label='Without Air Resistance')
-plt.plot(x_with_air, y_with_air, label='With Air Resistance')
-plt.title('Projectile Trajectories with and without Air Resistance')
-plt.xlabel('Distance (m)')
-plt.ylabel('Height (m)')
-plt.legend()
-plt.grid(True)
+
+fig, ax = plt.subplots(2, 2, figsize=(15, 10))
+plt.subplots_adjust(hspace=0.3, wspace=0.3)
+
+# XY Plot
+ax[0, 0].plot(xnr, ynr, label='No air R', linestyle='-', color='blue')
+ax[0, 0].plot(xr, yr, label='Air R', linestyle='--', color='red')
+ax[0, 0].set_xlabel('Distance (m)')
+ax[0, 0].set_ylabel('Height (m)')
+ax[0, 0].set_title('X vs Y')
+ax[0, 0].legend()
+ax[0, 0].grid(True)
+
+# TY Plot
+ax[0, 1].plot(tnr, ynr, label='No air R', linestyle='-', color='blue')
+ax[0, 1].plot(tr, yr, label='Air R', linestyle='--', color='red')
+ax[0, 1].set_xlabel('Time (s)')
+ax[0, 1].set_ylabel('Height (m)')
+ax[0, 1].set_title('Y vs T')
+ax[0, 1].legend()
+ax[0, 1].grid(True)
+
+# TVX Plot
+ax[1, 0].plot(tnr, vxnr, label='No air R', linestyle='-', color='blue')
+ax[1, 0].plot(tr, vxr, label='Air R', linestyle='--', color='red')
+ax[1, 0].set_xlabel('Time (s)')
+ax[1, 0].set_ylabel('Velocity in X (m/s)')
+ax[1, 0].set_title('VX vs T')
+ax[1, 0].legend()
+ax[1, 0].grid(True)
+
+# TVY Plot
+ax[1, 1].plot(tnr, vynr, label='No air R', linestyle='-', color='blue')
+ax[1, 1].plot(tr, vyr, label='Air R', linestyle='--', color='red')
+ax[1, 1].set_xlabel('Time (s)')
+ax[1, 1].set_ylabel('Velocity in Y (m/s)')
+ax[1, 1].set_title('VY vs T')
+ax[1, 1].legend()
+ax[1, 1].grid(True)
+
 plt.show()
-
-
-
-
-
-
-        
-
-
-
-
-
