@@ -117,7 +117,7 @@ def projectile_motion(g, X, Y, step, h):
         text.set_visible(visibility)
     plt.draw()"""
 
-step = 1000  # Time step
+step = 1000 
 g = 9.81
 h = float(input("Enter starting height in meters"))
 X = float(input("Enter the X coordinate of the target point: "))
@@ -132,7 +132,6 @@ font.set_family('sans-serif')
 font.set_name('Arial')
 font.set_size(12)
 
-# Plot trajectories
 ax.plot(x_positions_min_u, y_positions_min_u, label='Min U')
 
 
