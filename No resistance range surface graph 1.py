@@ -22,10 +22,10 @@ def generate_surface(h, u_values, theta_values, step):
     return U, Theta, X, Y
 
 #Params
-h = float(input("Enter initial height of object: "))  # Initial height in meters
-u_values = np.linspace(1, 100, 50)  # Initial velocities in m/s
-theta_values = np.linspace(0, 90, 50)  # Launch angles in degrees
-step = 10000  #Accuracy
+h = float(input("Enter initial height of object: ")) 
+u_values = np.linspace(1, 100, 50)  
+theta_values = np.linspace(0, 90, 50)  
+step = 10000  
 
 
 U, Theta, X, Y = generate_surface(h, u_values, theta_values, step)
@@ -33,7 +33,7 @@ U, Theta, X, Y = generate_surface(h, u_values, theta_values, step)
 
 fig = plt.figure(figsize=(15, 5))
 
-# Plot the range surface
+
 ax1 = fig.add_subplot(121, projection='3d')
 ax1.plot_surface(U, Theta, X, cmap='inferno')
 ax1.set_title('Projectile Motion Range')
@@ -41,7 +41,6 @@ ax1.set_xlabel('Initial Velocity (m/s)')
 ax1.set_ylabel('Launch Angle (degrees)')
 ax1.set_zlabel('Range (m)')
 
-# Plot the maximum height surface
 ax2 = fig.add_subplot(122, projection='3d')
 ax2.plot_surface(U, Theta, Y, cmap='magma')
 ax2.set_title('Projectile Motion Maximum Height')
