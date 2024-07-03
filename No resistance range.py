@@ -47,9 +47,9 @@ def projectile_motion(h, u, theta, step, g=9.81):
     
     return np.array(x_positions_m), np.array(y_positions_m), x_a_m, y_a_m, np.array(x_positions_u), np.array(y_positions_u), x_a_u, y_a_u
 
-u = float(input("Enter initial velocity"))  # Initial velocity in m/s
-theta = float(input("Enter initial angle in degrees"))  # Launch angle in degrees
-step = 1000  # Time step in seconds
+u = float(input("Enter initial velocity"))  
+theta = float(input("Enter initial angle in degrees"))  
+step = 1000 
 h = float(input("Enter initial height of object"))
 
 x_positions_m, y_positions_m, x_a_m, y_a_m, x_positions_u, y_positions_u, x_a_u, y_a_u = projectile_motion(h, u, theta, step)
