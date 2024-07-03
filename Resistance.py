@@ -58,8 +58,8 @@ cs_area = 0.007854  # Cross-sectional area (m^2)
 m = 0.1  # Object mass (kg)
 dt = 0.01  # Time step (s)
 v0 = 20  # Initial speed (m/s)
-angle = 30  # Launch angle (degrees)
-h = 2
+angle = 30  # Launch angle (deg)
+h = 2 #Initial height
 
 x_no_air, y_no_air = without_air_resistance(v0, h, angle)
 x_with_air, y_with_air = with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)
