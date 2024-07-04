@@ -2,7 +2,7 @@
 earth and sky simulation: YES
 path calculation:
 path plotting: YES
-follow earth:
+follow earth: YES
 gui: 
 app: 
 '''
@@ -35,66 +35,68 @@ class World(object):
     def __init__(self):
         base.setBackgroundColor(0, 0, 0)
         self.show_engine()
-        # self.setupGUI()
-
-    def setupGUI(self):
-        self.tasks = ["Task 1", "Task 2", "Task 3", "Task 4", "Task 5", "Task 6", "Task 7", "Task 8", "Task 9", "Engine"]
-
-        self.option_menu=DirectOptionMenu(
-            text= "Select an Option:",
-            items=self.tasks,
-            command=self.selectTask,
-            initialitem=9,
-            scale=0.1,
-            pos=(-1.3, 0, 0.9),
-        )
-    
-    def selectTask(self, task_index):
-        task_index = self.tasks.index(task_index)
-        self.clearScreen()
-        
-        if task_index == 9:
-            self.show_engine()
 
     def show_engine(self):
         self.state = 0
+        self.lexist = 0
         camera.setPos(0, 30, 0)
         camera.lookAt(0, 0, 0)
         base.camLens.setFov(90)
 
         self.planet()
         self.lights()
-        
+
+
+# -------------------------------------------- BUTTONS --------------------------------------------
+
+
         self.fbutton = DirectButton(
-            text="Follow",
+            text="FOLLOW",
             scale=0.1,
             command=self.followClick,
-            color = (0.2, 0.2, 0.2, 1)
-        )
+            color = (0.2, 0.2, 0.2, 1))
         self.fbutton.setPos(1.1, 0.9, 0.9)
 
         self.sbutton = DirectButton(
-            text="Settings",
+            text="SETTINGS",
             scale=0.1,
-            command=self.settings,
-            color = (0.2, 0.2, 0.2, 1)
-        )
+            command=self.gui,
+            color = (0.2, 0.2, 0.2, 1))
         self.sbutton.setPos(1.1, 0.9, 0.7)
+
+        self.pbutton = DirectButton(
+            text="PLOT",
+            scale=0.1,
+            command=self.createpath,
+            color = (0.2, 0.2, 0.2, 1))
+        self.pbutton.setPos(1.1, 0.9, 0.5)
+
 
     def followClick(self):
         self.state = 1 - self.state
         if self.state:
-            self.erotate.resume()
-            self.srotate.pause()
+            self.erotate.pause()
+            if self.lexist:
+                self.lrotate.pause()
+            self.srotate.resume()
             self.fbutton['frameColor'] = (0.2, 0.2, 0.2, 1)
         else:
-            self.erotate.pause()
-            self.srotate.resume()
+            self.erotate.resume()
+            if self.lexist:
+                self.lrotate.resume()
+            self.srotate.pause()
             self.fbutton['frameColor'] = (0.5, 0.5, 0.5, 1)
     
-    def settings(self):
-        self.createpath()
+
+# -------------------------------------------- GUI --------------------------------------------
+
+
+    def gui(self):
         pass
+
+
+# -------------------------------------------- SCENERY --------------------------------------------
+
 
     def planet(self):
         self.sky = loader.loadModel("solar_sky_sphere")
@@ -103,6 +105,8 @@ class World(object):
         self.sky.reparentTo(render)
         self.sky.setScale(200)
         self.srotate = self.sky.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+        self.srotate.loop()
+        self.srotate.pause()
 
         self.orbit_root_earth = render.attachNewNode('orbit_root_earth')
         self.earth = loader.loadModel("planet_sphere")
@@ -140,10 +144,26 @@ class World(object):
 
         render.clearLight()
 
-        if hasattr(self, 'button') and self.button:
-            self.button.destroy()
-            del self.button
-    
+        if hasattr(self, 'fbutton') and self.fbutton:
+            self.fbutton.destroy()
+            del self.fbutton
+
+        if hasattr(self, 'sbutton') and self.sbutton:
+            self.sbutton.destroy()
+            del self.sbutton
+        
+        if hasattr(self, 'earth') and self.earth:
+            self.earth.removeNode()
+            del self.earth
+        
+        if hasattr(self, 'lines_np') and self.lines_np:
+            self.lines_np.destroy()
+            del self.lines_np
+
+
+# -------------------------------------------- TRAJECTORY --------------------------------------------
+
+
     def createpath(self):
 
         x0, y0, z0 = R, R, 0  # initial position (m)
@@ -154,7 +174,11 @@ class World(object):
         t = np.linspace(0, 1000, 1000000)
 
         sol = odeint(self.projectile_motion, state0, t)
-        print(sol)
+
+
+        if hasattr(self, 'lines_np') and self.lines_np:
+            self.lines_np.removeNode()
+            del self.lines_np
 
         lines = LineSegs()
         
@@ -174,9 +198,12 @@ class World(object):
         
         # render path
         self.lines_np = render.attach_new_node(lines.create())
-        self.lines_np.set_pos(0, 0, 0) 
+        self.lines_np.set_pos(0, 0, 0)
         self.lrotate = self.lines_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
         self.lrotate.loop()
+        if self.state:
+            self.lrotate.pause()
+        self.lexist = 1
 
     def projectile_motion(self, state, t):
     
