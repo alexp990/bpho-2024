@@ -1,6 +1,6 @@
 from manim import *
 
-class ProjectileMotion(Scene):
+class Task1(Scene):
     def construct(self):
 
 #-----------------------Projectile Motion Simulation--------------------
