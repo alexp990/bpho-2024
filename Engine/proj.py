@@ -1,6 +1,6 @@
 '''
 earth and sky simulation: YES
-path calculation:
+path calculation: YES
 path plotting: YES
 follow earth: YES
 gui: 
@@ -17,18 +17,6 @@ from direct.task import Task
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
-
-
-m = 1.0  # mass of the projectile (kg)
-rho0 = 1.225  # air density at sea level (kg/m^3)
-A = 0.01  # cross-sectional area of the projectile (m^2)
-C_d = 1  # drag coefficient (dimensionless)
-omega = 10  # angular velocity of Earth's rotation (rad/s)
-g0 = 9.81  # gravitational acceleration at sea level (m/s^2)
-R = 1000.0  # radius of the Earth (m)
-T0 = 288.15  # standard temperature at sea level (K)
-L = 0.0065  # temperature lapse rate (K/m)
-
 
 class World(object):
 
@@ -71,20 +59,26 @@ class World(object):
             color = (0.2, 0.2, 0.2, 1))
         self.pbutton.setPos(1.1, 0.9, 0.5)
 
-
     def followClick(self):
+        if omega == 0:
+            return
+
         self.state = 1 - self.state
         if self.state:
             self.erotate.pause()
             if self.lexist:
                 self.lrotate.pause()
             self.srotate.resume()
+            self.alrotate.resume()
+            self.dlrotate.resume()
             self.fbutton['frameColor'] = (0.2, 0.2, 0.2, 1)
         else:
             self.erotate.resume()
             if self.lexist:
                 self.lrotate.resume()
             self.srotate.pause()
+            self.alrotate.pause()
+            self.dlrotate.pause()
             self.fbutton['frameColor'] = (0.5, 0.5, 0.5, 1)
     
 
@@ -124,13 +118,20 @@ class World(object):
         ambient_light.setColor(Vec4(0.2, 0.2, 0.2, 1))
         ambient_light_node = render.attachNewNode(ambient_light)
         render.setLight(ambient_light_node)
+        self.alrotate = ambient_light_node.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+        self.alrotate.loop()
+        if self.state:
+            self.alrotate.pause()
 
         directional_light = DirectionalLight("directionalLight")
         directional_light.setColor(Vec4(0.8, 0.8, 0.8, 1))
         directional_light_np = render.attachNewNode(directional_light)
         directional_light_np.setHpr(0, -15, 0)
         render.setLight(directional_light_np)
-
+        self.dlrotate = directional_light_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+        self.dlrotate.loop()
+        if self.state:
+            self.dlrotate.pause()
 
     def clearScreen(self):
 
@@ -157,7 +158,7 @@ class World(object):
             del self.earth
         
         if hasattr(self, 'lines_np') and self.lines_np:
-            self.lines_np.destroy()
+            self.lines_np.removeNode()
             del self.lines_np
 
 
@@ -166,14 +167,15 @@ class World(object):
 
     def createpath(self):
 
-        x0, y0, z0 = R, R, 0  # initial position (m)
-        vx0, vy0, vz0 = 1000, 1000, 1000
+        x0, y0, z0 = 0, R, 0  # initial position (m)
+        vx0, vy0, vz0 = 1000, 1000, 5000
 
         state0 = [x0, y0, z0, vx0, vy0, vz0]
 
-        t = np.linspace(0, 1000, 1000000)
+        t = np.linspace(0, 10000, 100000)
 
         sol = odeint(self.projectile_motion, state0, t)
+        print(sol)
 
 
         if hasattr(self, 'lines_np') and self.lines_np:
@@ -206,39 +208,45 @@ class World(object):
         self.lexist = 1
 
     def projectile_motion(self, state, t):
-    
-        x, y, z, dx, dy, dz = state
+
+        x, y, z, vx, vy, vz = state
         r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+
         if r < R - 10:
-            dx *= -1
-            dy *= -1
-            dz *= -1
-        
+            return [0, 0, 0, -vx, -vy, -vz]
+
         # find density at altitude
-        rho = rho0 * np.exp(-(g0 * r * 0.0289644 / (8.31447 * T0)) + ((g0 * r) / (R * T0)) - (L * r) / T0)
+        rho = 0.000001 * T0 - 9.8 * (r - R) ** 2
+        if rho < 0: rho = 0
         
         # Calculate velocity components
-        v = np.sqrt(dx**2 + dy**2 + dz**2)
-        v_x = dx
-        v_y = dy
-        v_z = dz
-        
+        v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
+        # print(r)        
+
         # Calculate drag force components
-        F_drag_x = -0.5 * rho * A * C_d * v * v_x
-        F_drag_y = -0.5 * rho * A * C_d * v * v_y
-        F_drag_z = -0.5 * rho * A * C_d * v * v_z
+        F_drag_x = -0.5 * rho * A * C_d * v * vx
+        F_drag_y = -0.5 * rho * A * C_d * v * vy
+        F_drag_z = -0.5 * rho * A * C_d * v * vz
         
         # Equations of motion with varying gravity
-        dxdt = v_x
-        dydt = v_y
-        dzdt = v_z
         
-        dvxdt = (F_drag_x - 2 * omega * dy - omega**2 * x) / m
-        dvydt = (F_drag_y + 2 * omega * dx - omega**2 * y - g0 * (R / (R + z))**2 * rho) / m
-        dvzdt = (F_drag_z - omega**2 * z) / m
+        ax = (F_drag_x - 2 * omega * vy - omega ** 2 * x) / m
+        ay = (F_drag_y + 2 * omega * vx - omega ** 2 * y - g0 * (R / (R + r)) ** 2 * rho) / m
+        az = (F_drag_z - omega ** 2 * z) / m
         
-        return [dxdt, dydt, dzdt, dvxdt, dvydt, dvzdt]
+        return [vx, vy, vz, ax, ay, az]
 
+
+
+
+
+m = 1.0  # mass of the projectile (kg)
+A = 0.01  # cross-sectional area of the projectile (m^2)
+C_d = 1  # drag coefficient (dimensionless)
+omega = 5 # angular velocity of Earth's rotation (rad/s)
+g0 = 9.81  # gravitational acceleration at sea level (m/s^2)
+R = 1000.0  # radius of the Earth (m)
+T0 = 288.15  # standard temperature at sea level (K)
 
 loadPrcFileData('', 'win-size 1024 768') 
 base = ShowBase()
