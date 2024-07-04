@@ -1,6 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Animations/media/videos/1080p60/partial_movie_files/ProjectileMotion/3977891868_3407458484_2504334408.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Animations/media/videos/1080p60/partial_movie_files/ProjectileMotion/2852726489_246151834_1514659776.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Animations/media/videos/1080p60/partial_movie_files/ProjectileMotion/2852726489_4033268549_338356919.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Animations/media/videos/1080p60/partial_movie_files/ProjectileMotion/2852726489_3639097050_1463814872.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Animations/media/videos/1080p60/partial_movie_files/ProjectileMotion/2852726489_1039154947_882841930.mp4'
