@@ -7,8 +7,8 @@ class Task1(Scene):
 
         h = 1  
         u = 5
-        theta = 60  
-        dt = 0.05  
+        theta = 70  
+        dt = 0.05 
         g = 9.81  
 
         theta_rad = np.radians(theta)
@@ -16,8 +16,8 @@ class Task1(Scene):
         u_x = u * np.cos(theta_rad)
         u_y = u * np.sin(theta_rad)
 
-        x_positions = []
-        y_positions = []
+        x_positions = [0]
+        y_positions = [h]
         x_velocities = []
         y_velocities = []
         vc = []
@@ -30,16 +30,20 @@ class Task1(Scene):
             vx = u_x
             vy = u_y - g * t
             v = np.sqrt(vx**2 + vy**2)
-            
-            if y < 0:
-                break
-            
+
             x_positions.append(x)
             y_positions.append(y)
             x_velocities.append(vx)
             y_velocities.append(vy)
             vc.append(v)
-
+            
+            if y < 0:
+                del x_positions[-1]
+                x_positions.append(x*0.99)
+                del y_positions[-1]
+                y_positions.append(0)
+                break
+            
 #-----------------------Animation--------------------
 
         #Draws Axes for graph
@@ -49,15 +53,13 @@ class Task1(Scene):
             axis_config={"color": BLUE}
         )
 
-        
-        # Add grid and axes to the scene
         self.add(axes)
 
         #Labels for initial conditions
-        velocity_label = MathTex(r"u = 5 \, \text{m/s}")
-        angle_label = MathTex(r"\theta = 30^\circ")
+        velocity_label = MathTex(r"u = 10 \, \text{m/s}").scale(0.7)
+        angle_label = MathTex(r"\theta = 70^\circ").scale(0.7)
         
-        velocity_label.to_corner(UL).shift(RIGHT * 1)
+        velocity_label.to_corner(UL).shift(RIGHT * 1.1)
         angle_label.next_to(velocity_label, DOWN)
 
         self.play(Write(velocity_label), Write(angle_label))
@@ -68,19 +70,35 @@ class Task1(Scene):
             y_values=y_positions,
             line_color=RED
         )
+        projectile_path.set_color(RED)
         self.play(Create(projectile_path))
+
+        #Initial Velocity Vector
+        p = 1
+        u_vector = Arrow(
+        start=axes.c2p(x_positions[0], y_positions[0]),
+        end=axes.c2p(x_positions[p] + u_x/15, y_positions[p] + u_y/15),
+        buff=0,
+        color=BLUE
+        )
+
+        self.play(Create(u_vector))
+
+        u_vector_label = MathTex(r"\vec{u}")
+        u_vector_label.next_to(u_vector.get_end(), DOWN).shift(DOWN * 0.3)
+
+        self.play(Write(u_vector_label))
 
         i = 6 #Index of position to plot object on
         ball = Circle(radius=0.1, color=YELLOW).move_to(axes.coords_to_point(x_positions[i], y_positions[i]))
         self.add(ball)
 
-        #vectors for object
+        #Vectors for object
         mg_vector = Arrow(start=ball.get_center(), end=ball.get_center() + DOWN, color=GREEN)
         vx_vector = Arrow(start=ball.get_center(), end=ball.get_center() + RIGHT * x_velocities[i], color=BLUE)
         vy_vector = Arrow(start=ball.get_center(), end=ball.get_center() + UP * y_velocities[i], color=BLUE)
         v_vector = Arrow(start=ball.get_center(), end=ball.get_center() + np.array([x_velocities[i], y_velocities[i], 0]), color=ORANGE)
 
-        #Draws vectors
         self.play(
             Create(mg_vector),
             Create(vx_vector),
@@ -88,13 +106,11 @@ class Task1(Scene):
             Create(v_vector)
         )
 
-        #Labels for vectors of object
-        mg_label = MathTex(r"\vec{mg}").next_to(mg_vector, DOWN)
+        mg_label = MathTex(r"\vec{mg}").next_to(mg_vector, ).scale(0.9)
         vx_label = MathTex(r"\vec{v}_x").next_to(vx_vector, RIGHT)
         vy_label = MathTex(r"\vec{v}_y").next_to(vy_vector, UP)
-        v_label = MathTex(r"\vec{v}").next_to(v_vector, RIGHT)
+        v_label = MathTex(r"\vec{v}").next_to(v_vector, RIGHT).shift(UP * 0.5)
 
-        #Drws labels for vectors
         self.play(
             Write(mg_label),
             Write(vx_label),
@@ -102,7 +118,7 @@ class Task1(Scene):
             Write(v_label)
         )
 
-        #Labels showing equations describing projectile motion
+        #Showing equations describing projectile motion
         x_eq = MathTex("x = u_x t")
         y_eq = MathTex("y = h + u_y t - \\frac{1}{2} g t^2")
         vx_eq = MathTex("v_x = u_x")
@@ -119,5 +135,5 @@ class Task1(Scene):
 
 
 if __name__ == "__main__":
-    scene = ProjectileMotion()
+    scene = Task1()
     scene.render()
