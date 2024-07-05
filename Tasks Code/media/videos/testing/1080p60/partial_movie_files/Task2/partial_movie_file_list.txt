@@ -1,0 +1,8 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/3977891868_3350262182_2790466914.mp4'
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/2852726489_3890345977_504479097.mp4'
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/2852726489_1797058892_702541483.mp4'
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/2852726489_3890345977_3147045415.mp4'
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/2852726489_3878651029_1466819233.mp4'
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/2852726489_3890345977_117345340.mp4'
+file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/Task2/2852726489_2475379470_3665513463.mp4'

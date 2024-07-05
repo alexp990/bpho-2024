@@ -1,5 +1,7 @@
 from manim import *
 
+"""Plot more than 1 initial value:NO"""
+
 class Task1(Scene):
     def construct(self):
 
@@ -8,7 +10,7 @@ class Task1(Scene):
         h = 1  
         u = 5
         theta = 70  
-        dt = 0.05 
+        dt = 0.007
         g = 9.81  
 
         theta_rad = np.radians(theta)
@@ -37,11 +39,7 @@ class Task1(Scene):
             y_velocities.append(vy)
             vc.append(v)
             
-            if y < 0:
-                del x_positions[-1]
-                x_positions.append(x*0.99)
-                del y_positions[-1]
-                y_positions.append(0)
+            if y <= 0:
                 break
             
 #-----------------------Animation--------------------
@@ -68,16 +66,17 @@ class Task1(Scene):
         projectile_path = axes.plot_line_graph(
             x_values=x_positions,
             y_values=y_positions,
-            line_color=RED
+            line_color=RED,
+            vertex_dot_radius=0.04
         )
         projectile_path.set_color(RED)
         self.play(Create(projectile_path))
 
         #Initial Velocity Vector
-        p = 1
+        p = 2
         u_vector = Arrow(
         start=axes.c2p(x_positions[0], y_positions[0]),
-        end=axes.c2p(x_positions[p] + u_x/15, y_positions[p] + u_y/15),
+        end=axes.c2p(x_positions[p] + u_x/8, y_positions[p] + u_y/8),
         buff=0,
         color=BLUE
         )
@@ -89,12 +88,12 @@ class Task1(Scene):
 
         self.play(Write(u_vector_label))
 
-        i = 6 #Index of position to plot object on
-        ball = Circle(radius=0.1, color=YELLOW).move_to(axes.coords_to_point(x_positions[i], y_positions[i]))
+        i = int(len(y_positions) * 0.3) #Index of position to plot object on
+        ball = Circle(radius=0.1, color=YELLOW, fill_opacity=0.8).move_to(axes.coords_to_point(x_positions[i], y_positions[i]))
         self.add(ball)
 
         #Vectors for object
-        mg_vector = Arrow(start=ball.get_center(), end=ball.get_center() + DOWN, color=GREEN)
+        mg_vector = Arrow(start=ball.get_center(), end=ball.get_center() + DOWN * 1.105, color=GREEN)
         vx_vector = Arrow(start=ball.get_center(), end=ball.get_center() + RIGHT * x_velocities[i], color=BLUE)
         vy_vector = Arrow(start=ball.get_center(), end=ball.get_center() + UP * y_velocities[i], color=BLUE)
         v_vector = Arrow(start=ball.get_center(), end=ball.get_center() + np.array([x_velocities[i], y_velocities[i], 0]), color=ORANGE)
