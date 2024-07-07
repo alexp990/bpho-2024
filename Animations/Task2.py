@@ -1,6 +1,8 @@
 from manim import *
 import numpy as np
 
+'''Nothing works here do not play'''
+
 class Task2(Scene):
     def construct(self):
 

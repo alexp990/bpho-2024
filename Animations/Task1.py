@@ -1,7 +1,8 @@
 from manim import *
 import numpy as np
 
-"""Plot more than 1 initial value:NO"""
+"""Plot more than 1 initial value:YES
+Plot initial theta value:NO"""
 
 class Task1(Scene):
 
@@ -15,9 +16,9 @@ class Task1(Scene):
 
 #-----------------------Projectile Motion Simulation--------------------
         h = 1  
-        u = 5
-        theta_values = [70, 10, 50]  
-        dt = 0.007
+        u = 5.0
+        theta_initial = 30 
+        dt = 0.001
         g = 9.81  
 
         def projectile_motion(theta):
@@ -57,7 +58,7 @@ class Task1(Scene):
 
         #Draws Axes for graph
         
-        x_for_axes, y_for_axes, nan1, nan2, nan3, nan4, nan5 = projectile_motion(mean(theta_values))
+        x_for_axes, y_for_axes, nan1, nan2, nan3, nan4, nan5 = projectile_motion(theta_initial)
         axes = Axes(
             x_range=[0, max(x_for_axes) + 1, 1],
             y_range=[0, max(y_for_axes) + 1, 1],
@@ -67,8 +68,8 @@ class Task1(Scene):
         self.add(axes)
 
         #Labels for initial conditions
-        velocity_label = MathTex(r"u = 5 \, \text{m/s}").scale(0.7)
-        angle_label = MathTex(r"\theta = 70^\circ").scale(0.7)
+        velocity_label = MathTex(r"u = 5.0 \, \text{m/s}").scale(0.7)
+        angle_label = MathTex(rf"\theta = {theta_initial}^\circ").scale(0.7)
         
         velocity_label.to_corner(UL).shift(RIGHT * 1.1)
         angle_label.next_to(velocity_label, DOWN)
@@ -85,59 +86,92 @@ class Task1(Scene):
         equations = VGroup(x_eq, y_eq, vx_eq, vy_eq, v_eq).arrange(DOWN, buff=0.5)
         equations.to_corner(UR)
 
-        self.play(Write(equations), run_time=1)
+        x_pos, y_pos, x_v, y_v, v, u_x, u_y = projectile_motion(theta_initial)
 
-        for theta in theta_values:
+        initial_path = axes.plot_line_graph(
+            x_values=x_pos,
+            y_values=y_pos,
+            line_color=RED,
+            add_vertex_dots=False
+        )
 
-            x_pos, y_pos, x_v, y_v, v, ux, uy = projectile_motion(theta)
+        self.play(Create(initial_path), Write(equations))
 
-            projectile_path_new = axes.plot_line_graph(
+        #self.wait(0.5)
+
+        theta_vals = [40, 50, 60, 70]
+        paths = []
+        paths.append(initial_path)
+        run_time = 1
+
+        for theta in theta_vals:
+            x_pos, y_pos, x_v, y_v, v, u_x, u_y = projectile_motion(theta)
+            path = axes.plot_line_graph(
                 x_values=x_pos,
                 y_values=y_pos,
-                line_color=RED,
-                vertex_dot_radius=0.04,
-                vertex_dot_style={"fill_color": RED}
+                line_color=YELLOW,
+                add_vertex_dots=False
             )
-
-            if 'projectile_path' in locals():
-                self.play(Transform(projectile_path, projectile_path_new), run_time=1), 
-            else:
-                projectile_path = projectile_path_new
-                self.play(Create(projectile_path), run_time=0.5)
-
+            paths.append(path)
             # Update labels
             velocity_label_new = MathTex(fr"u = {u:.1f} \, \text{{m/s}}").scale(0.7)
             angle_label_new = MathTex(fr"\theta = {theta}^\circ").scale(0.7)
             velocity_label_new.to_corner(UL).shift(RIGHT * 1.1)
             angle_label_new.next_to(velocity_label_new, DOWN)
-            self.play(Transform(velocity_label, velocity_label_new), run_time=0.3)
-            self.play(Transform(angle_label, angle_label_new), run_time=0.3)
+            self.play(Transform(velocity_label, velocity_label_new), run_time=0.001)
+            self.play(Transform(angle_label, angle_label_new), run_time=0.1)
+            self.play(Create(path), run_time=run_time)
+            run_time = run_time / 2
 
-            #Initial Velocity Vector
+        theta_vals.insert(0, theta_initial)
+
+        focus_theta = 50
+        focus_index = theta_vals.index(focus_theta)
+        focus_path = paths[focus_index]
+
+        for i, path in enumerate(paths):
+            if i != focus_index:
+                self.play(path.animate.set_stroke(opacity=0), run_time=0.1)
+            else:
+                self.play(focus_path.animate.set_stroke(opacity=1, color=GREEN), run_time=0.5)
+
+        self.wait(0.7)
+
+        #generates vals for focus path
+        x_pos_focus, y_pos_focus, x_v_focus, y_v_focus, v_focus, u_x_focus, u_y_focus = projectile_motion(focus_theta)
+
+        # Update labels
+        velocity_label_new = MathTex(fr"u = {u:.1f} \, \text{{m/s}}").scale(0.7)
+        angle_label_new = MathTex(fr"\theta = {focus_theta}^\circ").scale(0.7)
+        velocity_label_new.to_corner(UL).shift(RIGHT * 1.1)
+        angle_label_new.next_to(velocity_label_new, DOWN)
+        self.play(Transform(velocity_label, velocity_label_new), run_time=0.001)
+        self.play(Transform(angle_label, angle_label_new), run_time=0.1)
+        self.play(Create(path), run_time=run_time)
+
+        #Initial Velocity Vector
         p = 2
         u_vector = Arrow(
-        start=axes.c2p(x_pos[0], y_pos[0]),
-        end=axes.c2p(x_pos[p] + ux/8, y_pos[p] + uy/8),
+        start=axes.c2p(x_pos_focus[0], y_pos_focus[0]),
+        end=axes.c2p(x_pos_focus[p] + u_x_focus/8, y_pos_focus[p] + u_y_focus/8),
         buff=0,
         color=BLUE
         )
-
-        #self.play(Create(u_vector))
 
         u_vector_label = MathTex(r"\vec{u}")
         u_vector_label.next_to(u_vector.get_end(), DOWN).shift(DOWN * 0.3)
 
         self.play(Write(u_vector_label), Create(u_vector), run_time=0.3)
 
-        i = int(len(y_pos) * 0.3) #Index of position to plot object on
-        ball = Circle(radius=0.1, color=YELLOW, fill_opacity=0.8).move_to(axes.coords_to_point(x_pos[i], y_pos[i]))
+        i = int(len(y_pos_focus) * 0.3) #Index of position to plot object on
+        ball = Circle(radius=0.1, color=YELLOW, fill_opacity=0.8).move_to(axes.coords_to_point(x_pos_focus[i], y_pos_focus[i]))
         self.add(ball)
 
         #Vectors for object
         mg_vector = Arrow(start=ball.get_center(), end=ball.get_center() + DOWN * 0.8, color=GREEN)
-        vx_vector = Arrow(start=ball.get_center(), end=ball.get_center() + RIGHT * x_v[i], color=BLUE)
-        vy_vector = Arrow(start=ball.get_center(), end=ball.get_center() + UP * y_v[i], color=BLUE)
-        v_vector = Arrow(start=ball.get_center(), end=ball.get_center() + np.array([x_v[i], y_v[i], 0]), color=ORANGE)
+        vx_vector = Arrow(start=ball.get_center(), end=ball.get_center() + RIGHT * x_v_focus[i], color=BLUE)
+        vy_vector = Arrow(start=ball.get_center(), end=ball.get_center() + UP * y_v_focus[i], color=BLUE)
+        v_vector = Arrow(start=ball.get_center(), end=ball.get_center() + np.array([x_v_focus[i], y_v_focus[i], 0]), color=ORANGE)
 
         self.play(
             Create(mg_vector),
