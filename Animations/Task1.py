@@ -69,7 +69,7 @@ class Task1(Scene):
 
         #Labels for initial conditions
         velocity_label = MathTex(r"u = 5.0 \, \text{m/s}").scale(0.7)
-        angle_label = MathTex(rf"\theta = {theta_initial}^\circ").scale(0.7)
+        angle_label = MathTex(rf"\theta = {theta_initial}^\circ", color=RED).scale(0.7)
         
         velocity_label.to_corner(UL).shift(RIGHT * 1.1)
         angle_label.next_to(velocity_label, DOWN)
@@ -104,18 +104,21 @@ class Task1(Scene):
         paths.append(initial_path)
         run_time = 1
 
+        colours = [ORANGE, YELLOW, GREEN, BLUE]
+
         for theta in theta_vals:
             x_pos, y_pos, x_v, y_v, v, u_x, u_y = projectile_motion(theta)
+            current_colour = colours[theta_vals.index(theta)]
             path = axes.plot_line_graph(
                 x_values=x_pos,
                 y_values=y_pos,
-                line_color=YELLOW,
+                line_color=current_colour,
                 add_vertex_dots=False
             )
             paths.append(path)
             # Update labels
             velocity_label_new = MathTex(fr"u = {u:.1f} \, \text{{m/s}}").scale(0.7)
-            angle_label_new = MathTex(fr"\theta = {theta}^\circ").scale(0.7)
+            angle_label_new = MathTex(fr"\theta = {theta}^\circ", color=current_colour).scale(0.7)
             velocity_label_new.to_corner(UL).shift(RIGHT * 1.1)
             angle_label_new.next_to(velocity_label_new, DOWN)
             self.play(Transform(velocity_label, velocity_label_new), run_time=0.001)
@@ -142,7 +145,7 @@ class Task1(Scene):
 
         # Update labels
         velocity_label_new = MathTex(fr"u = {u:.1f} \, \text{{m/s}}").scale(0.7)
-        angle_label_new = MathTex(fr"\theta = {focus_theta}^\circ").scale(0.7)
+        angle_label_new = MathTex(fr"\theta = {focus_theta}^\circ", color=GREEN).scale(0.7)
         velocity_label_new.to_corner(UL).shift(RIGHT * 1.1)
         angle_label_new.next_to(velocity_label_new, DOWN)
         self.play(Transform(velocity_label, velocity_label_new), run_time=0.001)
@@ -159,13 +162,26 @@ class Task1(Scene):
         )
 
         u_vector_label = MathTex(r"\vec{u}")
-        u_vector_label.next_to(u_vector.get_end(), DOWN).shift(DOWN * 0.3)
+        u_vector_label.next_to(u_vector.get_end(), UP)
 
         self.play(Write(u_vector_label), Create(u_vector), run_time=0.3)
 
         i = int(len(y_pos_focus) * 0.3) #Index of position to plot object on
         ball = Circle(radius=0.1, color=YELLOW, fill_opacity=0.8).move_to(axes.coords_to_point(x_pos_focus[i], y_pos_focus[i]))
         self.add(ball)
+
+        # Angle label between x-axis and initial velocity vector
+        angle = Angle(
+            Line(axes.c2p(0, h), axes.c2p(1, h)),  # X-axis
+            Line(axes.c2p(0, h), axes.c2p(u_x_focus, h + u_y_focus)),  # Initial velocity
+            radius=0.5,
+            other_angle=False,
+        )
+        angle_label = MathTex(r"\theta^\circ", color=GREEN)
+        angle_label.next_to(angle, RIGHT).shift(UP * 0.1).shift(LEFT * 0.2).scale(0.7)
+
+        #Line for angle label
+        line_for_angle_label = Line(axes.c2p(0, h), axes.c2p(0.5, h))
 
         #Vectors for object
         mg_vector = Arrow(start=ball.get_center(), end=ball.get_center() + DOWN * 0.8, color=GREEN)
@@ -178,6 +194,9 @@ class Task1(Scene):
             Create(vx_vector),
             Create(vy_vector),
             Create(v_vector),
+            Create(angle),
+            Create(angle_label),
+            Create(line_for_angle_label),
             run_time = 0.5
         )
 
@@ -197,7 +216,7 @@ class Task1(Scene):
         self.wait(1)
 
 
-
+#Renders scene
 if __name__ == "__main__":
     scene = Task1()
     scene.render()
