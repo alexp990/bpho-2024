@@ -6,11 +6,6 @@ class Task1(Scene):
 
     def construct(self):
 
-        def mean(input):
-            mean = sum(input) / len(input)
-
-            return mean
-
 #-----------------------Projectile Motion Simulation--------------------
         h = 1  
         u = 5.0
