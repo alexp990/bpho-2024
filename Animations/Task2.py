@@ -1,7 +1,8 @@
 from manim import *
 import numpy as np
 
-'''Nothing works here do not play'''
+"""Add changing u vector LABEL: NO
+Add equations: NO"""
 
 class Task2(Scene):
     def construct(self):
@@ -9,21 +10,21 @@ class Task2(Scene):
         # Initial Parameters
         h = 1  
         u = 5
-        theta = 30  
-        theta_tracker = ValueTracker(theta)
+        theta_vals = [20, 30, 40, 50, 60, 70, 80]
         g = 9.81  
-        step = 100
-        theta_tracker = ValueTracker(theta)
+        step = 1000
 
-        def generate_path(theta):
+        def projectile_motion(theta):
             theta_rad = np.deg2rad(theta)
             
-            # Compute the range
             range_value = (u ** 2 / g) * (np.sin(theta_rad) * np.cos(theta_rad) + 
                     np.cos(theta_rad) * np.sqrt(np.square(np.sin(theta_rad)) + 
                     (2 * g * h) / np.square(u)))
                     
             dx = range_value / step
+
+            u_x = u * np.cos(theta_rad)
+            u_y = u * np.sin(theta_rad)
 
             x_positions = [0]
             y_positions = [h]
@@ -41,43 +42,123 @@ class Task2(Scene):
                 if y <= 0:
                     break
 
-            return x_positions, y_positions
+            return x_positions, y_positions, u_x, u_y
         
-        x_positions, y_positions = generate_path(30)
         
-        def update_path(obj):
-            current_theta = theta_tracker.get_value()
-            x_positions, y_positions = generate_path(current_theta)
-            obj.set_points([*zip(x_positions, y_positions, np.zeros_like(x_positions))])
-
-        #Generate Initial PAth
-        projectile_path = VMobject()
-        projectile_path.set_points([*zip(x_positions, y_positions, np.zeros_like(x_positions))])
-        projectile_path.set_color(RED)
-
+        x_for_axes, y_for_axes, nan1, nan2 = projectile_motion(theta_vals[1])
         axes = Axes(
-        x_range=[0, max(x_positions) + 1, 1],
-        y_range=[0, max(y_positions) + 1, 1],
+        x_range=[0, max(x_for_axes) * 2, 1],  
+        y_range=[0, max(y_for_axes) * 2, 1], 
         axis_config={"color": BLUE}
         )
 
-        self.add(axes, projectile_path)
+        self.add(axes)
 
-        velocity_label = MathTex(r"u = 5 \, \text{m/s}").scale(0.7)
-        angle_label = MathTex(r"\theta = 70^\circ").scale(0.7)
+        #Labels for initial conditions
+        init_labels_scale = 0.5
+        shift_val = 1
+        #velocity_label = MathTex(r"u = 5.0 \, \text{m/s}").scale(init_labels_scale)
+        #angle_label = MathTex(rf"\theta = {theta_vals[1]}^\circ", color=PINK).scale(init_labels_scale)
+        height_label_brace_text = MathTex(r"1.0 \, \text{m}").scale(0.5)
+        height_label_brace = BraceBetweenPoints(axes.c2p(0, 0), axes.c2p(0, h), LEFT)
+        height_label_brace_text.next_to(height_label_brace, LEFT).shift(RIGHT * 0.15)
+        step_label = Tex(rf"Accuracy = {step} x points/range").scale(init_labels_scale)
+        
+        
+        initial_conditions = VGroup(step_label).arrange(DOWN, buff=0.2)
+        initial_conditions.to_corner(UL).shift(RIGHT * shift_val)
 
-        velocity_label.to_corner(UL).shift(RIGHT * 1.1)
-        angle_label.next_to(velocity_label, DOWN)
+        self.play(Write(initial_conditions), Create(height_label_brace), Write(height_label_brace_text))
 
-        self.play(Write(velocity_label), Write(angle_label))
+        #Initial line
+        x_pos, y_pos, u_x, u_y = projectile_motion(theta_vals[0])
 
-        self.add(theta_tracker)
+        initial_path = axes.plot_line_graph(
+            x_values=x_pos,
+            y_values=y_pos,
+            line_color=PINK,
+            add_vertex_dots=False
+        )
+
+        angle = Angle(
+            Line(axes.c2p(0, h), axes.c2p(1, h)),  # X-axis
+            Line(axes.c2p(0, h), axes.c2p(u_x, h + u_y)),  # Initial velocity
+            radius=0.5,
+            other_angle=False,
+            color=PINK
+        )
+        angle.set_z_index(9)
+
+        angle_text = MathTex(rf"{theta_vals[0]}^\circ", color=PINK)
+        angle_text.next_to(angle, RIGHT).shift(UP * 0.1).scale(0.7)
+
+        #Line for angle label
+        line_for_angle_label = Line(axes.c2p(0, h), axes.c2p(0.5, h))
+
+        p = 1 #Index of which point to map tjhe end of the u_vector
+        u_vector = Arrow(
+            start=axes.c2p(x_pos[0], y_pos[0]),
+            end=axes.c2p(x_pos[p] + u_x/8, y_pos[p] + u_y/8),
+            buff=0,
+            color=BLUE
+        )       
+        u_vector.set_z_index(10)
+        angle_text.set_z_index(4)
+
+        self.play(Create(initial_path), Create(u_vector), Create(angle), Write(angle_text), Create(line_for_angle_label), run_time=0.5)
         self.wait(1)
+        paths = []
+        colours = [RED, ORANGE, YELLOW, GREEN, BLUE, TEAL]
 
-        theta_tracker.set_value(30)  # Change theta to 30
-        self.play(theta_tracker.animate.set_value(80), UpdateFromFunc(projectile_path, update_path))
-        self.wait(1)
-        self.play(theta_tracker.animate.set_value(50), UpdateFromFunc(projectile_path, update_path))
-        self.wait(1)
+        del(theta_vals[0])
 
-        self.wait(3)
+        for theta in theta_vals:
+            x_pos, y_pos, u_x, u_y = projectile_motion(theta)
+            current_colour = colours[theta_vals.index(theta)]
+            path = axes.plot_line_graph(
+                x_values=x_pos,
+                y_values=y_pos,
+                line_color=current_colour,
+                add_vertex_dots=False
+            )
+            #path.set_z_index(theta_vals.index(theta))
+            paths.append(path)
+
+            #Update labels
+            u_vector_new = Arrow(
+            start=axes.c2p(x_pos[0], y_pos[0]),
+            end=axes.c2p(x_pos[p] + u_x/8, y_pos[p] + u_y/8),
+            buff=0,
+            color=BLUE
+            )       
+            angle_new = Angle(
+            Line(axes.c2p(0, h), axes.c2p(1, h)),  # X-axis
+            Line(axes.c2p(0, h), axes.c2p(u_x, h + u_y)),  # Initial velocity
+            radius=0.5,
+            other_angle=False,
+            color=current_colour
+            )
+            angle_new_text = MathTex(rf"{theta}^\circ", color=current_colour)
+            angle_new_text.next_to(angle, RIGHT).shift(UP * 0.1).scale(0.7)
+
+            #angle_label_new = MathTex(fr"\theta = {theta}^\circ", color=current_colour).scale(init_labels_scale)
+            #initial_conditions = VGroup(velocity_label, angle_label_new, step_label).arrange(DOWN, buff=0.2)
+            initial_conditions.to_corner(UL).shift(RIGHT * shift_val)
+
+            self.play(Transform(u_vector, u_vector_new), Transform(angle, angle_new), Transform(angle_text, angle_new_text), Create(path), run_time=0.5)
+        
+            
+#Renders scene
+if __name__ == "__main__":
+    scene = Task2()
+    scene.render()
+
+
+
+
+
+
+
+
+        
+    

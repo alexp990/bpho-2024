@@ -1,6 +1,8 @@
 from manim import *
 import numpy as np
 
+"""Add axes: NO"""
+
 class Task1(Scene):
 
 
@@ -146,7 +148,7 @@ class Task1(Scene):
 
         # Update labels
         velocity_label_new = MathTex(fr"u = {u:.1f} \, \text{{m/s}}").scale(0.7)
-        angle_label_new = MathTex(fr"\theta = {theta}^\circ", color=current_colour).scale(0.7)
+        angle_label_new = MathTex(fr"\theta = {focus_theta}^\circ", color=GREEN).scale(0.7)
 
         x_eq_new = MathTex("x = u_x t", color=GREEN)
         y_eq_new = MathTex("y = h + u_y t - \\frac{1}{2} g t^2", color=GREEN)
