@@ -8,7 +8,8 @@ class Task1(Scene):
 
     def construct(self):
 
-#-----------------------Projectile Motion Simulation--------------------
+        #-----------------------Projectile Motion Simulation--------------------
+        
         h = 1  
         u = 5.0
         theta_initial = 30 
@@ -56,9 +57,9 @@ class Task1(Scene):
         axes = Axes(
             x_range=[0, max(x_for_axes) + 1, 1],
             y_range=[0, max(y_for_axes) + 1, 1],
-            axis_config={"color": BLUE}
+            axis_config={"color": BLUE},
         )
-
+        axes.add_coordinates()
         self.add(axes)
 
         #Labels for initial conditions
@@ -117,7 +118,7 @@ class Task1(Scene):
             x_eq_new = MathTex("x = u_x t", color=current_colour)
             y_eq_new = MathTex("y = h + u_y t - \\frac{1}{2} g t^2", color=current_colour)
 
-            equations = VGroup(x_eq_new, y_eq_new, vx_eq, vy_eq, v_eq).arrange(DOWN, buff=0.5)
+            equations = VGroup(x_eq_new, y_eq_new, vx_eq, vy_eq, v_eq).arrange(DOWN, buff=0.5).scale(0.5)
             equations.to_corner(UR)
 
             velocity_label_new.to_corner(UL).shift(RIGHT * 1.1)
@@ -210,7 +211,7 @@ class Task1(Scene):
             run_time = 0.5
         )
 
-        mg_label = MathTex(r"\vec{mg}", color=YELLOW).next_to(mg_vector).scale(0.9)
+        mg_label = MathTex(r"m\vec{g}", color=YELLOW).next_to(mg_vector).scale(0.9)
         vx_label = MathTex(r"\vec{v}_x", color=LIGHT_PINK).next_to(vx_vector, RIGHT)
         vy_label = MathTex(r"\vec{v}_y", color=RED).next_to(vy_vector, UP)
         v_label = MathTex(r"\vec{v}", color=ORANGE).next_to(v_vector, RIGHT).shift(UP * 0.5)
