@@ -58,7 +58,7 @@ class Task2(Scene):
         y_range=[0, max(y_for_axes) * 2, 1], 
         axis_config={"color": BLUE}
         )
-        axes.scale(0.9)
+        axes.scale(0.8)
         axes.add_coordinates()
         self.add(axes)
 

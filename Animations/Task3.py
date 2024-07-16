@@ -106,8 +106,17 @@ class Task3(Scene):
 
         theta_eq_quadratic = MathTex(
             r"\theta_{\pm} = \tan^{-1}\left(\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\right)").scale(0.6)
+        
+        discriminant_description_text = Tex(
+            r"When $u > u_{min}$, $b^2-4ac > 0$  \\",
+            r"$\therefore$ the +solution is the high path and -solution is the low path"
+        )
+        #self.add(index_labels(discriminant_description_text[0]))
+        discriminant_description_text[1][4:13].set_color(ORANGE)
+        discriminant_description_text[1][29:38].set_color(GREEN)
+        discriminant_description_text.scale(0.6)
 
-        equations = VGroup(u_eq, theta_eq_parts, theta_eq_quadratic).arrange(DOWN, buff=0.5)
+        equations = VGroup(u_eq, theta_eq_parts, theta_eq_quadratic, discriminant_description_text).arrange(DOWN, buff=0.3)
         equations.to_corner(UR)
 
         self.play(Write(equations))
@@ -138,16 +147,22 @@ class Task3(Scene):
         target_point = Dot(point=axes.c2p(X, Y), color=WHITE, radius=0.1)
         target_point_text = Tex(r"(X, Y)", color=BLUE).next_to(target_point, UP).scale(0.7).shift(LEFT * 0.1).shift(DOWN * 0.3)
 
-        u_min_label = MathTex(r"u_{\text{min}} \approx " + f"{int(u_min)} \, \t{{m/s}}").scale(0.6)
+        u_min_label = MathTex(r"u_{\text{min}} \approx " + f"{int(u_min)} \, \t{{m/s}}", color=RED).scale(0.6)
         user_u_label = MathTex(r"u = " + f"{user_u} \, \t{{m/s}}").scale(0.6)
-
         
         initial_conditions = VGroup(u_min_label, user_u_label).arrange(DOWN, buff=0.2)
-        initial_conditions.to_corner(UL).shift(RIGHT * 0.6)
+        initial_conditions.to_corner(UL).shift(RIGHT * 0.3).shift(DOWN * 0.1)
 
-        self.play(Create(u_min_path), Create(u_high_path), Create(u_low_path), Write(target_point), Write(target_point_text), Write(initial_conditions))
+        angle_min_u_text = MathTex(r"\theta_{u_{\text{min}}} \approx " + f"{int(theta_deg_min_u)} ^\\circ", color=RED)
+        angle_u_high_text = MathTex(r"\theta_{\text{high}} \approx " + f"{int(theta_deg_user_u_high)} ^\\circ", color=ORANGE)
+        angle_u_low_text = MathTex(r"\theta_{\text{low}} \approx " + f"{int(theta_deg_user_u_low)} ^\\circ", color=GREEN)
 
-        self.wait(2)
+        angle_labels = VGroup(angle_min_u_text, angle_u_high_text, angle_u_low_text).arrange(DOWN, buff=0.2).scale(0.6)
+        angle_labels.next_to(initial_conditions, RIGHT)
+
+        self.play(Create(u_min_path), Create(u_high_path), Create(u_low_path), Write(target_point), Write(target_point_text), Write(initial_conditions), Write(angle_labels))
+
+        self.wait(3)
 
         
 
