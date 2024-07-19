@@ -99,7 +99,7 @@ class Task1(Scene):
         paths.append(initial_path)
         run_time = 1
 
-        colours = [ORANGE, YELLOW, GREEN, BLUE]
+        colours = [RED, RED, RED, RED]
 
         for theta in theta_vals:
             x_pos, y_pos, x_v, y_v, v, u_x, u_y = projectile_motion(theta)
@@ -118,7 +118,7 @@ class Task1(Scene):
             x_eq_new = MathTex("x = u_x t", color=current_colour)
             y_eq_new = MathTex("y = h + u_y t - \\frac{1}{2} g t^2", color=current_colour)
 
-            equations = VGroup(x_eq_new, y_eq_new, vx_eq, vy_eq, v_eq).arrange(DOWN, buff=0.5).scale(0.5)
+            equations = VGroup(x_eq_new, y_eq_new, vx_eq, vy_eq, v_eq).arrange(DOWN, buff=0.5)
             equations.to_corner(UR)
 
             velocity_label_new.to_corner(UL).shift(RIGHT * 1.1)

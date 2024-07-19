@@ -149,8 +149,9 @@ class Task3(Scene):
 
         u_min_label = MathTex(r"u_{\text{min}} \approx " + f"{int(u_min)} \, \t{{m/s}}", color=RED).scale(0.6)
         user_u_label = MathTex(r"u = " + f"{user_u} \, \t{{m/s}}").scale(0.6)
+        target_label = Tex(rf"X = {X}, Y = {Y}", color=BLUE).scale(0.6)
         
-        initial_conditions = VGroup(u_min_label, user_u_label).arrange(DOWN, buff=0.2)
+        initial_conditions = VGroup(u_min_label, user_u_label, target_label).arrange(DOWN, buff=0.2)
         initial_conditions.to_corner(UL).shift(RIGHT * 0.3).shift(DOWN * 0.1)
 
         angle_min_u_text = MathTex(r"\theta_{u_{\text{min}}} \approx " + f"{int(theta_deg_min_u)} ^\\circ", color=RED)

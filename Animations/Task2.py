@@ -58,7 +58,7 @@ class Task2(Scene):
         y_range=[0, max(y_for_axes) * 2, 1], 
         axis_config={"color": BLUE}
         )
-        axes.scale(0.8)
+        axes.scale(0.9)
         axes.add_coordinates()
         self.add(axes)
 
@@ -77,12 +77,12 @@ class Task2(Scene):
         initial_conditions.to_corner(UL).shift(RIGHT * shift_val)
 
         #Showing equations describing projectile motion
-        y_eq = MathTex(r"y = h + x\tan \theta - \frac{g}{2u^2} \left(1 + \tan^2 \theta \right)x^2", color=PINK)
-        x_eq = Tex("Each x position is a fraction of the range R",  color=PINK)
+        y_eq = MathTex(r"y = h + x\tan \theta - \frac{g}{2u^2} \left(1 + \tan^2 \theta \right)x^2", color=RED)
+        x_eq = Tex("Each x position is a fraction of the range R",  color=RED)
         x_a_eq = MathTex(r"x_a = \frac{u^2}{g} \sin \theta \cos \theta", color=YELLOW)
         y_a_eq = MathTex(r"y_a = h + \frac{u^2}{2g} \sin^2 \theta", color=YELLOW)
         tof_eq = MathTex(r"TOF = \frac{R}{u \cos \theta}")
-        range_eq = MathTex(r"R = \frac{u^2}{g} \left( \sin \theta \cos \theta + \cos \theta \sqrt{\sin^2 \theta + \frac{2gh}{u^2}} \right)", color=RED)
+        range_eq = MathTex(r"R = \frac{u^2}{g} \left( \sin \theta \cos \theta + \cos \theta \sqrt{\sin^2 \theta + \frac{2gh}{u^2}} \right)", color=PINK)
 
         equations = VGroup(y_eq, x_eq, x_a_eq, y_a_eq, tof_eq, range_eq).arrange(DOWN, buff=0.5).scale(0.5)
         equations.to_corner(UR) 
@@ -95,7 +95,7 @@ class Task2(Scene):
         initial_path = axes.plot_line_graph(
             x_values=x_pos,
             y_values=y_pos,
-            line_color=PINK,
+            line_color=RED,
             add_vertex_dots=False
         )
         #Apogee point
@@ -104,7 +104,7 @@ class Task2(Scene):
 
         #Brace for range equation
         range_brace = BraceBetweenPoints(axes.c2p(0, 0), axes.c2p(range, 0))
-        range_brace_text = Tex("Range R", color=RED)
+        range_brace_text = Tex("Range R", color=PINK)
         range_brace_text.next_to(range_brace, DOWN).scale(0.5)
 
         #Angle theta graphical representation
@@ -113,11 +113,11 @@ class Task2(Scene):
             Line(axes.c2p(0, h), axes.c2p(u_x, h + u_y)),  # Initial velocity
             radius=0.5,
             other_angle=False,
-            color=PINK
+            color=BLUE
         )
         angle.set_z_index(9)
 
-        angle_text = MathTex(rf"{theta_vals[0]}^\circ", color=PINK)
+        angle_text = MathTex(rf"{theta_vals[0]}^\circ", color=WHITE)
         angle_text.next_to(angle, RIGHT).shift(UP * 0.1).scale(0.7)
 
         #Line for angle label
@@ -143,7 +143,7 @@ class Task2(Scene):
         self.play(Create(apogee_point), Write(apogee_point_text), run_time=0.5)
         self.wait(1)
         paths = []
-        colours = [RED, ORANGE, YELLOW, GREEN, BLUE, TEAL]
+        colours = [RED, RED, RED, RED, RED, RED]
 
         del(theta_vals[0])
 
@@ -186,10 +186,10 @@ class Task2(Scene):
             Line(axes.c2p(0, h), axes.c2p(u_x, h + u_y)), 
             radius=0.5,
             other_angle=False,
-            color=current_colour
+            color=BLUE
             )
 
-            angle_new_text = MathTex(rf"{theta}^\circ", color=current_colour)
+            angle_new_text = MathTex(rf"{theta}^\circ", color=WHITE)
             angle_new_text.next_to(angle, RIGHT).shift(UP * 0.1).scale(0.7)
 
             initial_conditions.to_corner(UL).shift(RIGHT * shift_val)
