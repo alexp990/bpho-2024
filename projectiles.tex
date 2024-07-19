@@ -1,0 +1,68 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{minted}
+\usepackage{subfig}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\om}{\omega}
+\title{Projectiles}
+
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+This paper presents a derivation of the equations of motion for a projectile launched on a rotating planet, incorporating fictitious forces due to the planet's rotation. It explores translational forces including gravitational attraction and quadratic drag, accounting for the variation of air density with altitude affecting drag calculations. By integrating these forces, the equations provide a model for projectile motion, essential for the completion of the extension tasks.
+\end{abstract}
+\section{Fictitious Forces}
+Points in a rotating planet frame has a nonzero acceleration, so there will be fictitious forces that we have to take into consideration. Let the angular velocity of the planet be $\bs{\om}$ and origin be the centre of the planet. An object at position $\bs{r}$ and velocity $v_r$ (in the rotating frame) will have a net velocity of 
+\begin{equation} \frac{d\bs{r}}{dt} = \bs{v_n} + \bs{\om} \times \bs{r} \end{equation}
+The acceleration can be determined by taking the time derivative of $(1)$
+\begin{equation} 
+\begin{aligned}[b]
+\frac{d^2\bs{r}}{dt^2} &= \frac{d}{dt}(\bs{v_r} + \bs{\om} \times \bs{r})\\
+& = \frac{d\bs{v_r}}{dt} + \bs{\om} \times \bs{v_r} \frac{d\bs{\om}}{dt} \times \bs{r} + \bs{\om} \times \bs{v_r}\\
+& = \bs{a_r} +  2\bs{\om} \times \bs{v_r} + \bs{\om} \times (\bs{\om} \times \bs{r}) + \dot{\bs{\om}} \times \bs{r}
+\end{aligned}
+\end{equation}
+By applying Newton's Second Law in the rotating frame, we derive four forces:
+\begin{center}
+\begin{equation}\text{Translational Force: } \bs{F_{tr}} = -m\bs{a_r}\end{equation}
+\begin{equation}\text{Centrifugal Force: } \bs{F_{cf}} = -m\bs{\om} \times (\bs{\om} \times \bs{r})\end{equation}
+\begin{equation}\text{Coriolis Force: } \bs{F_{co}} = -2m\bs{\om} \times \bs{v_r}\end{equation}
+\begin{equation}\text{Euler Force: } \bs{F_{eu}} = -m\dot{\bs{\om}} \times \bs{r}\end{equation}
+\end{center}
+We will assume that the planet is rotating at a constant velocity, so the Euler Force does not need to be considered. There also isnt any Translational Force as the planet is stationary.\\
+For simplicity, let the axis of rotation $\bs{\hat{\om}}$ lie on the $\bs{z}$ axis. The centrifugal and coriolis force can then be written as 
+\begin{equation} \bs{F_{cf}} = -m\om^2x\bs{\hat{x}} - m\om^2y\bs{\hat{y}} \end{equation}
+\begin{equation} \bs{F_{co}} = 2m\om\dot{y}\bs{\hat{x}} - 2m\om\dot{x}\bs{\hat{y}}\end{equation}
+
+\section{Translational Forces}
+The Gravitational Force is described by Newton's Law of Universal Gravitation
+\begin{equation}
+\begin{aligned}[b]
+\bs{F_g} &= -\frac{GMm}{r^2}\bs{\hat{r}}\\
+&= -\frac{GMm}{(x^2+y^2+z^2)^{3/2}}\bs{r}\\
+&= -\frac{GMmx}{(x^2+y^2+z^2)^{3/2}}\bs{\hat{x}} -\frac{GMmy}{(x^2+y^2+z^2)^{3/2}}\bs{\hat{y}} -\frac{GMmz}{(x^2+y^2+z^2)^{3/2}}\bs{\hat{z}}\\
+\end{aligned}
+\end{equation}
+where $\bs{r} \equiv (x, y, z)$, $M$ is the mass of the planet, $m$ is the mass of the projectile and $G$ is the gravitational constant.\\
+\\
+The Drag Force is described by Newton's Drag Equation (quatratic drag)
+\begin{equation}
+\begin{aligned}[b]
+\bs{F_d} &= -\frac{1}{2}C_d\rho(r)Av^2\bs{\hat{v}}\\
+&= -\frac{1}{2}C_d\rho(r)Av\bs{v}\\
+&= -\frac{1}{2}C_d\rho(r)Av\dot{x}\bs{\hat{x}} - \frac{1}{2}C_d\rho(r)Av\dot{y}\bs{\hat{y}} - \frac{1}{2}C_d\rho(r)Av\dot{z}\bs{\hat{z}}
+\end{aligned}
+\end{equation}
+where $C_d$ is the drag coefficient, $A$ is the corss-sectional area, $\rho(r)$ is the density of air at altitude $r$ and $\bs{v} \equiv (\dot{x}, \dot{y}, \dot{z})$.
+
+
+
+
+
+
+\end{document}
