@@ -13,6 +13,7 @@ from direct.gui.DirectGui import *
 from panda3d.core import AmbientLight, DirectionalLight, Vec4
 from panda3d.core import loadPrcFileData 
 from panda3d.core import LineSegs, LVector4f
+from panda3d.core import TextNode
 from direct.task import Task
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,6 +23,7 @@ class World(object):
 
     def __init__(self):
         base.setBackgroundColor(0, 0, 0)
+        self.state0 = [0, R, 0, 0, 0, 0]
         self.show_engine()
 
     def show_engine(self):
@@ -48,7 +50,7 @@ class World(object):
         self.sbutton = DirectButton(
             text="SETTINGS",
             scale=0.1,
-            command=self.gui,
+            command=self.show_input_gui,
             color = (0.2, 0.2, 0.2, 1))
         self.sbutton.setPos(1.1, 0.9, 0.7)
 
@@ -58,6 +60,7 @@ class World(object):
             command=self.createpath,
             color = (0.2, 0.2, 0.2, 1))
         self.pbutton.setPos(1.1, 0.9, 0.5)
+        
 
     def followClick(self):
         if omega == 0:
@@ -85,9 +88,47 @@ class World(object):
 # -------------------------------------------- GUI --------------------------------------------
 
 
-    def gui(self):
-        pass
+    def show_input_gui(self):
 
+        self.input_frame = DirectFrame(frameColor=(1, 1, 1, 1),
+                                    frameSize=(-0.5, 0.5, -0.5, 0.5),
+                                    pos=(0, 0, 0))
+
+        # Add labels
+        self.lat_label = DirectLabel(parent=self.input_frame, text="LATITUDE:", scale=0.05, pos=(-0.45, 0, 0.4), frameColor=(1, 1, 1, 0), text_align=TextNode.ALeft)
+        self.lon_label = DirectLabel(parent=self.input_frame, text="LONGITUDE:", scale=0.05, pos=(-0.45, 0, 0.3), frameColor=(1, 1, 1, 0), text_align=TextNode.ALeft)
+        self.angle1_label = DirectLabel(parent=self.input_frame, text="LAUNCH ANG:", scale=0.05, pos=(-0.45, 0, 0.2), frameColor=(1, 1, 1, 0), text_align=TextNode.ALeft)
+        self.angle2_label = DirectLabel(parent=self.input_frame, text="AZIMUTH ANG:", scale=0.05, pos=(-0.45, 0, 0.1), frameColor=(1, 1, 1, 0), text_align=TextNode.ALeft)
+        self.velocity_label = DirectLabel(parent=self.input_frame, text="VELOCITY:", scale=0.05, pos=(-0.45, 0, 0.0), frameColor=(1, 1, 1, 0), text_align=TextNode.ALeft)
+
+        # Create input fields
+        self.lat_input = DirectEntry(parent=self.input_frame, scale=0.05, pos=(-0.05, 0, 0.4), numLines=1, focus=1)
+        self.lon_input = DirectEntry(parent=self.input_frame, scale=0.05, pos=(-0.05, 0, 0.3), numLines=1, focus=1)
+        self.angle1_input = DirectEntry(parent=self.input_frame, scale=0.05, pos=(-0.05, 0, 0.2), numLines=1)
+        self.angle2_input = DirectEntry(parent=self.input_frame, scale=0.05, pos=(-0.05, 0, 0.1), numLines=1)
+        self.velocity_input = DirectEntry(parent=self.input_frame, scale=0.05, pos=(-0.05, 0, 0.0), numLines=1)
+
+        self.submit_button = DirectButton(parent=self.input_frame, text="SUBMIT", scale=0.05, command=self.get_input_values)
+        self.submit_button.setPos(0, 0, -0.3)
+
+    def get_input_values(self):
+
+        lat = float(self.lat_input.get())
+        lon = float(self.lon_input.get())
+        angle1 = float(self.angle1_input.get())
+        angle2 = float(self.angle2_input.get())
+        velo = float(self.velocity_input.get())
+
+        # Calculate initial components based on angles
+        self.state0[0] = R * np.cos(np.radians(lat)) * np.cos(np.radians(lon))
+        self.state0[1] = R * np.cos(np.radians(lat)) * np.sin(np.radians(lon))
+        self.state0[2] = R * np.sin(np.radians(lat))
+        self.state0[3] = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        self.state0[4] = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        self.state0[5] = np.sin(np.radians(angle2)) * velo
+
+        # Remove the input frame
+        self.input_frame.destroy()
 
 # -------------------------------------------- SCENERY --------------------------------------------
 
@@ -113,6 +154,7 @@ class World(object):
         self.erotate = self.earth.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
         self.erotate.loop()
 
+
     def lights(self):
         ambient_light = AmbientLight("ambientLight")
         ambient_light.setColor(Vec4(0.2, 0.2, 0.2, 1))
@@ -132,6 +174,7 @@ class World(object):
         self.dlrotate.loop()
         if self.state:
             self.dlrotate.pause()
+
 
     def clearScreen(self):
 
@@ -167,16 +210,8 @@ class World(object):
 
     def createpath(self):
 
-        x0, y0, z0 = 0, R, 0  # initial position (m)
-        vx0, vy0, vz0 = 1000, 1000, 5000
-
-        state0 = [x0, y0, z0, vx0, vy0, vz0]
-
-        t = np.linspace(0, 10000, 100000)
-
-        sol = odeint(self.projectile_motion, state0, t)
-        print(sol)
-
+        t = np.linspace(0, 100000, 1000000)
+        sol = odeint(self.projectile_motion, self.state0, t)
 
         if hasattr(self, 'lines_np') and self.lines_np:
             self.lines_np.removeNode()
@@ -207,6 +242,11 @@ class World(object):
             self.lrotate.pause()
         self.lexist = 1
 
+    def nexp(self, n):
+        if n < -5000:
+            return 1
+        return np.exp(n)
+
     def projectile_motion(self, state, t):
 
         x, y, z, vx, vy, vz = state
@@ -216,37 +256,50 @@ class World(object):
             return [0, 0, 0, -vx, -vy, -vz]
 
         # find density at altitude
-        rho = 0.000001 * T0 - 9.8 * (r - R) ** 2
-        if rho < 0: rho = 0
+        rho = r0 * self.nexp(-g0 * (r - R) / R_ / T0)
         
         # Calculate velocity components
         v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
-        # print(r)        
 
-        # Calculate drag force components
-        F_drag_x = -0.5 * rho * A * C_d * v * vx
-        F_drag_y = -0.5 * rho * A * C_d * v * vy
-        F_drag_z = -0.5 * rho * A * C_d * v * vz
+        # gravitational force
+        ax_g = -G * M * x / r ** 3
+        ay_g = -G * M * y / r ** 3
+        az_g = -G * M * z / r ** 3
         
-        # Equations of motion with varying gravity
+        # coriolis force
+        ax_c = 2 * omega * vy
+        ay_c = -2 * omega * vx
+        az_c = 0
         
-        ax = (F_drag_x - 2 * omega * vy - omega ** 2 * x) / m
-        ay = (F_drag_y + 2 * omega * vx - omega ** 2 * y - g0 * (R / (R + r)) ** 2 * rho) / m
-        az = (F_drag_z - omega ** 2 * z) / m
+        # centrifugal force
+        ax_cf = -omega ** 2 * x
+        ay_cf = -omega ** 2 * y
+        az_cf = 0
         
+        # drag force
+        ax_d = -0.5 * C_d * rho * A * v * vx / m
+        ay_d = -0.5 * C_d * rho * A * v * vy / m
+        az_d = -0.5 * C_d * rho * A * v * vz / m
+        
+        # total acceleration
+        ax = ax_g + ax_c + ax_cf + ax_d
+        ay = ay_g + ay_c + ay_cf + ay_d
+        az = az_g + az_c + az_cf + az_d
+            
         return [vx, vy, vz, ax, ay, az]
-
-
-
 
 
 m = 1.0  # mass of the projectile (kg)
 A = 0.01  # cross-sectional area of the projectile (m^2)
-C_d = 1  # drag coefficient (dimensionless)
-omega = 5 # angular velocity of Earth's rotation (rad/s)
-g0 = 9.81  # gravitational acceleration at sea level (m/s^2)
+C_d = 0.47  # drag coefficient (dimensionless)
+omega = 0.1 # angular velocity of Earth's rotation (rad/s)
+r0 = 1.225 # air density at sea level, kg/m^3
 R = 1000.0  # radius of the Earth (m)
+R_ = 8.314 # specific gas constant J/K/mol
 T0 = 288.15  # standard temperature at sea level (K)
+G = 6.67430e-11 # gravitational constant, m^3 kg^-1 s^-2
+M = 1e10 # mass of the planet, kg
+g0 = G * M / R ** 3  # gravitational acceleration at sea level (m/s^2)
 
 loadPrcFileData('', 'win-size 1024 768') 
 base = ShowBase()
