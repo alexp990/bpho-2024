@@ -30,6 +30,9 @@ def projectile_motion(g, X, Y, step, h):
     theta_deg_user_u_low = np.rad2deg(theta_rad_user_u_low)
     print(f"User u theta (low ball) is {theta_deg_user_u_low} degrees") 
 
+    alpha = 2*g*h / user_u**2
+    theta_rad_max_range = 1 / np.sqrt(2 + alpha)
+
     range_min_u = u_min**2 / g * (np.sin(theta_rad_min_u) * np.cos(theta_rad_min_u) + np.cos(theta_rad_min_u) * np.sqrt(np.square(np.sin(theta_rad_min_u)) + (2 * g * h) / (np.square(u_min))))
 
     dx = range_min_u / step
@@ -58,6 +61,9 @@ def projectile_motion(g, X, Y, step, h):
 
     x_positions_user_u_low = [0]
     y_positions_user_u_low = [h]
+
+    x_positions_max_range = [0]
+    y_positions_max_range = [h]
 
     x = 0
 
@@ -102,11 +108,23 @@ def projectile_motion(g, X, Y, step, h):
         if y_bound <= 0:
             break
 
+    x = 0
+
+    while True:
+        x += dx
+        y_max_r = h + x * np.tan(theta_rad_max_range) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_max_range)**2) * x**2
+        x_positions_max_range.append(x)
+        y_positions_max_range.append(y_max_r)
+        if y_max_r <= 0:
+            break
+
+
     return (
         np.array(x_positions_min_u), np.array(y_positions_min_u), x_a_min, y_a_min,
         np.array(x_positions_user_u_high), np.array(y_positions_user_u_high), x_a_high, y_a_high,
         np.array(x_positions_user_u_low), np.array(y_positions_user_u_low), x_a_low, y_a_low,
         np.array(x_positions_bounding), np.array(y_positions_bounding), 
+        np.array(x_positions_max_range), np.array(y_positions_max_range),
         user_u, 
         g
     )
@@ -123,7 +141,7 @@ h = float(input("Enter starting height in meters"))
 X = float(input("Enter the X coordinate of the target point: "))
 Y = float(input("Enter the Y coordinate of the target point: "))
 
-x_positions_min_u, y_positions_min_u, x_a_min, y_a_min, x_positions_user_u_high, y_positions_user_u_high, x_a_high, y_a_high, x_positions_user_u_low, y_positions_user_u_low, x_a_low, y_a_low, x_positions_bounding, y_positions_bounding, user_u, g = projectile_motion(g, X, Y, step, h)
+x_positions_min_u, y_positions_min_u, x_a_min, y_a_min, x_positions_user_u_high, y_positions_user_u_high, x_a_high, y_a_high, x_positions_user_u_low, y_positions_user_u_low, x_a_low, y_a_low, x_positions_bounding, y_positions_bounding, x_positions_max_range, y_positions_max_range, user_u, g = projectile_motion(g, X, Y, step, h)
 
 fig, ax = plt.subplots()
 
@@ -142,6 +160,8 @@ ax.plot(x_positions_user_u_low, y_positions_user_u_low, label='Low')
 
 
 ax.plot(x_positions_bounding, y_positions_bounding, label='Bounding Parabola')
+
+ax.plot(x_positions_max_range, y_positions_max_range, label='Max range')
 
 ax.plot(X, Y, marker='.', label=f'Target {X}, {Y}')
 
