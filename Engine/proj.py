@@ -4,7 +4,7 @@ path calculation: YES
 path plotting: YES
 follow earth: YES
 input: YES
-projection: 
+info: 
 app: 
 '''
 
@@ -158,15 +158,6 @@ class World(object):
         omega = fl(self.omega_input.get(), omega)
         C_d = fl(self.drag_input.get(), C_d)
 
-
-        # Calculate initial components based on angles
-        self.state0[0] = R * np.cos(np.radians(lat)) * np.cos(np.radians(lon))
-        self.state0[1] = R * np.cos(np.radians(lat)) * np.sin(np.radians(lon))
-        self.state0[2] = R * np.sin(np.radians(lat))
-        self.state0[3] = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
-        self.state0[4] = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
-        self.state0[5] = np.sin(np.radians(angle2)) * velo
-
         # Remove the input frame
         self.drag_image.hide()
         self.input_frame.destroy()
@@ -181,9 +172,6 @@ class World(object):
         self.sky.setTexture(self.sky_tex, 1)
         self.sky.reparentTo(render) # type: ignore
         self.sky.setScale(200)
-        self.srotate = self.sky.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
-        self.srotate.loop()
-        self.srotate.pause()
 
         self.orbit_root_earth = render.attachNewNode('orbit_root_earth') # type: ignore
         self.earth = loader.loadModel("planet_sphere") # type: ignore
@@ -193,8 +181,12 @@ class World(object):
         self.earth.setScale(10)
         self.earth.setPos(0, 0, 0)
 
-        self.erotate = self.earth.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
-        self.erotate.loop()
+        if omega != 0:
+            self.srotate = self.sky.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+            self.srotate.loop()
+            self.srotate.pause()
+            self.erotate = self.earth.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+            self.erotate.loop()
 
 
     def lights(self):
@@ -202,20 +194,20 @@ class World(object):
         ambient_light.setColor(Vec4(0.2, 0.2, 0.2, 1))
         ambient_light_node = render.attachNewNode(ambient_light) # type: ignore
         render.setLight(ambient_light_node) # type: ignore
-        self.alrotate = ambient_light_node.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
-        self.alrotate.loop()
-        if self.state:
-            self.alrotate.pause()
 
         directional_light = DirectionalLight("directionalLight")
         directional_light.setColor(Vec4(0.8, 0.8, 0.8, 1))
         directional_light_np = render.attachNewNode(directional_light) # type: ignore # type: ignore
         directional_light_np.setHpr(0, -15, 0)
         render.setLight(directional_light_np) # type: ignore
-        self.dlrotate = directional_light_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
-        self.dlrotate.loop()
-        if self.state:
-            self.dlrotate.pause()
+        if omega != 0:
+            self.alrotate = ambient_light_node.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+            self.alrotate.loop()
+            self.dlrotate = directional_light_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+            self.dlrotate.loop()
+            if self.state:
+                self.alrotate.pause()
+                self.dlrotate.pause()
 
 
     def clearScreen(self):
@@ -251,9 +243,17 @@ class World(object):
 
 
     def createpath(self):
+        # Calculate initial components based on angles
+        self.state0[0] = R * np.cos(np.radians(lat)) * np.cos(np.radians(lon))
+        self.state0[1] = R * np.cos(np.radians(lat)) * np.sin(np.radians(lon))
+        self.state0[2] = R * np.sin(np.radians(lat))
+        self.state0[3] = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        self.state0[4] = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        self.state0[5] = np.sin(np.radians(angle2)) * velo
 
         t = np.linspace(0, 100000, 1000000)
         sol = odeint(self.projectile_motion, self.state0, t)
+        print(sol)
 
         if hasattr(self, 'lines_np') and self.lines_np:
             self.lines_np.removeNode()
@@ -278,11 +278,13 @@ class World(object):
         # render path
         self.lines_np = render.attach_new_node(lines.create()) # type: ignore
         self.lines_np.set_pos(0, 0, 0)
-        self.lrotate = self.lines_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
-        self.lrotate.loop()
-        if self.state:
-            self.lrotate.pause()
+        if omega != 0:
+            self.lrotate = self.lines_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+            self.lrotate.loop()
+            if self.state:
+                self.lrotate.pause()
         self.lexist = 1
+
 
     def projectile_motion(self, state, t):
 
@@ -293,7 +295,7 @@ class World(object):
             return [0, 0, 0, -vx, -vy, -vz]
 
         # find density at altitude
-        rho = r0 * nexp(G * M / R_ / T0 / r + omega * omega * R * (r - R) * (x * x + y * y) / r / r / R_ / T0)
+        rho = r0 * nexp(G * M / R_ / T0 / r)
         
         # Calculate velocity components
         v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
@@ -327,19 +329,19 @@ class World(object):
 
 lat = 0
 lon = 0
-angle1 = 90
-angle2 = 0
-velo = 100
+angle1 = 60
+angle2 = 60
+velo = 5000
 m = 1.0  # mass of the projectile (kg)
 A = 0.01  # cross-sectional area of the projectile (m^2)
 C_d = 0.47  # drag coefficient (dimensionless)
-omega = 0.1 # angular velocity of Earth's rotation (rad/s)
+omega = 1 # angular velocity of Earth's rotation (rad/s)
 r0 = 1.225 # air density at sea level, kg/m^3
 R = 1000.0  # radius of the Earth (m)
 R_ = 8.314 # specific gas constant J/K/mol
 T0 = 2.5  # standard temperature at sea level (K)
 G = 6.67430e-11 # gravitational constant, m^3 kg^-1 s^-2
-M = 1e10 # mass of the planet, kg
+M = 1e11 # mass of the planet, kg
 
 loadPrcFileData('', 'win-size 1024 768') 
 base = ShowBase()
