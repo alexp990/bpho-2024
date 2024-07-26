@@ -4,7 +4,7 @@ path calculation: YES
 path plotting: YES
 follow earth: YES
 input: YES
-info: 
+animation: YES
 app: 
 '''
 
@@ -16,9 +16,8 @@ from panda3d.core import loadPrcFileData
 from panda3d.core import LineSegs, LVector4f
 from panda3d.core import TextNode
 from direct.task import Task
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+import numpy as np
 
 def fl(n, ex = 0):
     try:
@@ -40,6 +39,7 @@ class World(object):
         base.setBackgroundColor(0, 0, 0)
         self.state0 = [0, R, 0, 0, 0, 0]
         self.show_engine()
+
 
     def show_engine(self):
         self.state = 0
@@ -81,7 +81,14 @@ class World(object):
             command=self.createpath,
             color = (0.2, 0.2, 0.2, 1))
         self.pbutton.setPos(1.1, 0.9, 0.5)
-        
+
+        self.abutton = DirectButton(
+            text="ANIMATE",
+            scale=0.1,
+            command=self.animate,
+            color = (0.2, 0.2, 0.2, 1))
+        self.abutton.setPos(1.1, 0.9, 0.3)
+
 
     def followClick(self):
         if omega == 0:
@@ -144,6 +151,7 @@ class World(object):
         self.submit_button = DirectButton(parent=self.input_frame, text="SUBMIT", scale=0.05, command=self.get_input_values)
         self.submit_button.setPos(0, 0, -0.5)
 
+
     def get_input_values(self):
         global lat, lon, angle1, angle2, velo, R, m, M, A, omega, C_d
         lat = fl(self.lat_input.get(), lat)
@@ -185,7 +193,7 @@ class World(object):
             self.srotate = self.sky.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
             self.srotate.loop()
             self.srotate.pause()
-            self.erotate = self.earth.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
+            self.erotate = self.orbit_root_earth.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
             self.erotate.loop()
 
 
@@ -243,40 +251,35 @@ class World(object):
 
 
     def createpath(self):
-        # Calculate initial components based on angles
-        self.state0[0] = R * np.cos(np.radians(lat)) * np.cos(np.radians(lon))
-        self.state0[1] = R * np.cos(np.radians(lat)) * np.sin(np.radians(lon))
-        self.state0[2] = R * np.sin(np.radians(lat))
-        self.state0[3] = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
-        self.state0[4] = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
-        self.state0[5] = np.sin(np.radians(angle2)) * velo
 
-        t = np.linspace(0, 100000, 1000000)
-        sol = odeint(self.projectile_motion, self.state0, t)
-        print(sol)
+        self.find_sol()
+        self.plot()
+
+
+    def plot(self):
 
         if hasattr(self, 'lines_np') and self.lines_np:
             self.lines_np.removeNode()
             del self.lines_np
 
-        lines = LineSegs()
+        self.lines = LineSegs()
         
-        lines.set_color(LVector4f(1, 0, 0, 1))
-        lines.set_thickness(3)
+        self.lines.set_color(LVector4f(1, 0, 0, 1))
+        self.lines.set_thickness(3)
         
         # draw path
-        c = 10 / R
-        for i, (x, y, z, vx, vy, vz) in enumerate(sol):
+        c = 1 / R
+        for i, (x, y, z, vx, vy, vz) in enumerate(self.sol):
             x *= c
             y *= c
             z *= c
             if i == 0:
-                lines.move_to(x, y, z)
+                self.lines.move_to(x, y, z)
             else:
-                lines.draw_to(x, y, z)
+                self.lines.draw_to(x, y, z)
         
         # render path
-        self.lines_np = render.attach_new_node(lines.create()) # type: ignore
+        self.lines_np = self.earth.attach_new_node(self.lines.create())
         self.lines_np.set_pos(0, 0, 0)
         if omega != 0:
             self.lrotate = self.lines_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
@@ -291,7 +294,7 @@ class World(object):
         x, y, z, vx, vy, vz = state
         r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
 
-        if r < R - 10:
+        if r < R:
             return [0, 0, 0, -vx, -vy, -vz]
 
         # find density at altitude
@@ -327,21 +330,80 @@ class World(object):
             
         return [vx, vy, vz, ax, ay, az]
 
+
+    def animate(self):
+        self.curind = 0
+        self.createpath()
+        base.taskMgr.add(self.animate_path, "AnimatePathTask")
+
+
+    def find_sol(self):
+        # Calculate initial components based on angles
+        self.state0[0] = R * np.cos(np.radians(lat)) * np.cos(np.radians(lon))
+        self.state0[1] = R * np.cos(np.radians(lat)) * np.sin(np.radians(lon))
+        self.state0[2] = R * np.sin(np.radians(lat))
+        self.state0[3] = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        self.state0[4] = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        self.state0[5] = np.sin(np.radians(angle2)) * velo
+
+        t = np.linspace(0, 100000, 100000)
+        self.sol = odeint(self.projectile_motion, self.state0, t)
+
+
+    def animate_path(self, task):
+        
+        self.lines = LineSegs()
+        self.lines.set_color(LVector4f(1, 0, 0, 1))
+        self.lines.set_thickness(3)
+        c = 1 / R
+        for i, (x, y, z, vx, vy, vz) in enumerate(self.sol):
+            if i > self.curind:
+                break
+            x *= c
+            y *= c
+            z *= c
+            if i == 0:
+                self.lines.move_to(x, y, z)
+            else:
+                self.lines.draw_to(x, y, z)
+
+        self.lines_np.removeNode()
+        self.lines_np = self.earth.attach_new_node(self.lines.create()) # type: ignore
+        self.lines_np.set_pos(0, 0, 0)
+        self.curind += 100
+
+        if self.curind >= len(self.sol) or self.sol[self.curind][0] ** 2 + self.sol[self.curind][1] ** 2 + self.sol[self.curind][2] ** 2 < R * R:
+            self.plot()
+            print(1)
+            return Task.done
+        
+        return Task.cont
+
+
+
+
+# -------------------------------------------- PARAMETERS --------------------------------------------
+
+
 lat = 0
 lon = 0
-angle1 = 60
-angle2 = 60
-velo = 5000
+angle1 = 30
+angle2 = 40
+velo = 1000
 m = 1.0  # mass of the projectile (kg)
 A = 0.01  # cross-sectional area of the projectile (m^2)
 C_d = 0.47  # drag coefficient (dimensionless)
-omega = 1 # angular velocity of Earth's rotation (rad/s)
-r0 = 1.225 # air density at sea level, kg/m^3
-R = 1000.0  # radius of the Earth (m)
+omega = 0.1 # angular velocity of Earth's rotation (rad/s)
+r0 = 1 # air density at sea level, kg/m^3
+R = 1000.0  # radius of the Planet (m)
 R_ = 8.314 # specific gas constant J/K/mol
 T0 = 2.5  # standard temperature at sea level (K)
 G = 6.67430e-11 # gravitational constant, m^3 kg^-1 s^-2
 M = 1e11 # mass of the planet, kg
+
+
+# -------------------------------------------- MAIN --------------------------------------------
+
 
 loadPrcFileData('', 'win-size 1024 768') 
 base = ShowBase()
