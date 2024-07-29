@@ -67,9 +67,9 @@ class Task6(Scene):
         labels2 = Tex("y displacement (m)").rotate(PI/2)
         labels2.next_to(ax2, LEFT*0.5).scale(0.5).shift(RIGHT*0.15)
 
-        labels3 = Tex("range (m)")
+        labels3 = Tex("time(s) (m)")
         labels3.next_to(ax1, DOWN*0.5).scale(0.5).shift(UP*0.15)
-        labels4 = Tex("time (s)").rotate(PI/2)
+        labels4 = Tex("range (m)").rotate(PI/2)
         labels4.next_to(ax1, LEFT*0.5).scale(0.5).shift(RIGHT*0.15)
 
         #Initial conditions
@@ -116,7 +116,7 @@ class Task6(Scene):
                 range_max = r(u, g, theta, t_max)
                 range_min = r(u, g, theta, t_min)
                 t_max_dot = Dot(ax1.c2p(t_max, range_max), color=RED)
-                t_min_dot = Dot(ax1.c2p(t_min, range_min), color=ORANGE)
+                t_min_dot = Dot(ax1.c2p(t_min, range_min), color=PINK)
                 dots_to_show.append(t_max_dot)
                 dots_to_show.append(t_min_dot)
 
@@ -141,12 +141,26 @@ class Task6(Scene):
                 x_max, y_max = projectile_motion(u, g, theta, t_max)
                 x_min, y_min = projectile_motion(u, g, theta, t_min)
                 x_max_dot = Dot(ax2.c2p(x_max, y_max), color=RED)
-                x_min_dot = Dot(ax2.c2p(x_min, y_min), color=RED)
+                x_min_dot = Dot(ax2.c2p(x_min, y_min), color=PINK)
                 dots_to_show.append(x_max_dot)
                 dots_to_show.append(x_min_dot)
 
         self.play(*[Create(plot) for plot in range_plots + displacement_plots], run_time=3)
         self.play(*[FadeIn(dot) for dot in dots_to_show], run_time=0.6)
+
+        max_dots_label_dot = Dot(color=PINK).next_to(initial_conditions, DOWN*1.3).shift(LEFT * 2.5)
+        max_dots_label_text = Tex(r"maximum point on range vs time graph").next_to(max_dots_label_dot, RIGHT*0.2).scale(0.6).shift(LEFT*1.7)
+
+        min_dots_label_dot = Dot(color=RED).next_to(initial_conditions, DOWN*2.8).shift(LEFT * 2.5)
+        min_dots_label_text = Tex(r"minimum point on range vs time graph").next_to(min_dots_label_dot, RIGHT*0.2).scale(0.6).shift(LEFT*1.7)
+
+        range_label_eq = MathTex(r"r = \sqrt{u^2 t^2 - g t^3 u \sin{\theta} + \frac{1}{4} g^2 t^4}")
+        t_plus_minus_eq = MathTex(r"t_{\pm} = \frac{3u}{2g} \left( \sin{\theta} \pm \sqrt{\sin^2{\theta} - \frac{8}{9}}")
+        theta_geq_eq = MathTex(r"\theta \geq \arcsin{\frac{2 \sqrt{2}}{3}}} \approx 70.5^\circ")
+
+        equations = VGroup(range_label_eq, t_plus_minus_eq, theta_geq_eq).arrange(DOWN, buff=0.3).next_to(initial_conditions, DOWN * 3.5).scale(0.6)
+
+        self.play(Create(max_dots_label_dot), Write(max_dots_label_text), Create(min_dots_label_dot), Write(min_dots_label_text), Write(equations), run_time=2)
 
         self.wait(2)
 
