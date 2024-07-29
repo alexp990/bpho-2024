@@ -145,9 +145,6 @@ class Task6(Scene):
                 dots_to_show.append(x_max_dot)
                 dots_to_show.append(x_min_dot)
 
-        self.play(*[Create(plot) for plot in range_plots + displacement_plots], run_time=3)
-        self.play(*[FadeIn(dot) for dot in dots_to_show], run_time=0.6)
-
         max_dots_label_dot = Dot(color=PINK).next_to(initial_conditions, DOWN*1.3).shift(LEFT * 2.5)
         max_dots_label_text = Tex(r"maximum point on range vs time graph").next_to(max_dots_label_dot, RIGHT*0.2).scale(0.6).shift(LEFT*1.7)
 
@@ -155,14 +152,15 @@ class Task6(Scene):
         min_dots_label_text = Tex(r"minimum point on range vs time graph").next_to(min_dots_label_dot, RIGHT*0.2).scale(0.6).shift(LEFT*1.7)
 
         range_label_eq = MathTex(r"r = \sqrt{u^2 t^2 - g t^3 u \sin{\theta} + \frac{1}{4} g^2 t^4}")
-        t_plus_minus_eq = MathTex(r"t_{\pm} = \frac{3u}{2g} \left( \sin{\theta} \pm \sqrt{\sin^2{\theta} - \frac{8}{9}}")
+        t_plus_minus_eq = MathTex(r"t_{\pm} = \frac{3u}{2g} \left( \sin{\theta} \pm \sqrt{\sin^2{\theta} - \frac{8}{9}} \right)")
         theta_geq_eq = MathTex(r"\theta \geq \arcsin{\frac{2 \sqrt{2}}{3}}} \approx 70.5^\circ")
 
         equations = VGroup(range_label_eq, t_plus_minus_eq, theta_geq_eq).arrange(DOWN, buff=0.3).next_to(initial_conditions, DOWN * 3.5).scale(0.6)
 
-        self.play(Create(max_dots_label_dot), Write(max_dots_label_text), Create(min_dots_label_dot), Write(min_dots_label_text), Write(equations), run_time=2)
+        self.play(*[Create(plot) for plot in range_plots + displacement_plots], Write(equations), run_time=3)
+        self.play(*[FadeIn(dot) for dot in dots_to_show], Create(max_dots_label_dot), Write(max_dots_label_text), Create(min_dots_label_dot), Write(min_dots_label_text), run_time=1)
 
-        self.wait(2)
+        self.wait(4)
 
 
 

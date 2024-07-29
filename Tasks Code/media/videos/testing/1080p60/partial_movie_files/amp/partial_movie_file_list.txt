@@ -1,3 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/amp/3977891868_1738880816_223132457.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/amp/2852726489_2746349149_3624504143.mp4'

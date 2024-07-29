@@ -1,5 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/AnimatePointsAndLineSegments/3977891868_563385503_3452282283.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/AnimatePointsAndLineSegments/2852726489_348938626_2398576052.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/AnimatePointsAndLineSegments/2852726489_710007563_1434617899.mp4'
-file 'file:C:/Users/Alex/Documents/GitHub/bpho-projectile-motion/Tasks Code/media/videos/testing/1080p60/partial_movie_files/AnimatePointsAndLineSegments/2852726489_1391716283_3067202293.mp4'
