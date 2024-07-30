@@ -97,16 +97,12 @@ class World(object):
         self.state = 1 - self.state
         if self.state:
             self.erotate.pause()
-            if self.lexist:
-                self.lrotate.pause()
             self.srotate.resume()
             self.alrotate.resume()
             self.dlrotate.resume()
             self.fbutton['frameColor'] = (0.2, 0.2, 0.2, 1)
         else:
             self.erotate.resume()
-            if self.lexist:
-                self.lrotate.resume()
             self.srotate.pause()
             self.alrotate.pause()
             self.dlrotate.pause()
@@ -188,6 +184,13 @@ class World(object):
         self.earth.reparentTo(self.orbit_root_earth)
         self.earth.setScale(10)
         self.earth.setPos(0, 0, 0)
+
+        self.lines = LineSegs()
+        self.lines.set_color(LVector4f(1, 0, 0, 1))
+        self.lines.set_thickness(3)
+        self.lines.move_to(0, 0, 0)
+        self.lines_np = self.earth.attach_new_node(self.lines.create()) # type: ignore
+        self.lines_np.set_pos(0, 0, 0)
 
         if omega != 0:
             self.srotate = self.sky.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
@@ -281,11 +284,6 @@ class World(object):
         # render path
         self.lines_np = self.earth.attach_new_node(self.lines.create())
         self.lines_np.set_pos(0, 0, 0)
-        if omega != 0:
-            self.lrotate = self.lines_np.hprInterval(360 / np.rad2deg(omega), (360, 0, 0))
-            self.lrotate.loop()
-            if self.state:
-                self.lrotate.pause()
         self.lexist = 1
 
 
@@ -339,14 +337,25 @@ class World(object):
 
     def find_sol(self):
         # Calculate initial components based on angles
-        self.state0[0] = R * np.cos(np.radians(lat)) * np.cos(np.radians(lon))
-        self.state0[1] = R * np.cos(np.radians(lat)) * np.sin(np.radians(lon))
-        self.state0[2] = R * np.sin(np.radians(lat))
-        self.state0[3] = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
-        self.state0[4] = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
-        self.state0[5] = np.sin(np.radians(angle2)) * velo
+        off = 60
+        self.state0[0] = R * np.cos(lat) * np.cos(off + lon)
+        self.state0[1] = R * np.cos(lat) * np.sin(off + lon)
+        self.state0[2] = R * np.sin(lat)
+        v_x = velo * np.sin(angle1) * np.cos(angle2)
+        v_y = velo * np.sin(angle1) * np.sin(angle2)
+        v_z = velo * np.cos(angle1)
+        self.state0[3] = v_x * np.cos(off + lon) - v_y * np.sin(off + lon)
+        self.state0[4] = v_x * np.sin(off + lon) * np.cos(lat) + v_y * np.cos(off + lon) * np.cos(lat) - v_z * np.sin(lat)
+        self.state0[5] = v_x * np.sin(lat) * np.sin(off + lon) + v_y * np.sin(lat) * np.cos(off + lon) + v_z * np.cos(lat)
+        # a = np.cos(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        # b = np.sin(np.radians(angle1)) * np.cos(np.radians(angle2)) * velo
+        # c = np.sin(np.radians(angle2)) * velo
+        # self.state0[3] = a*np.cos(np.radians(170 + lon)) - b*np.sin(np.radians(170 + lon))*np.cos(np.radians(lat)) + c*np.sin(np.radians(170 + lon))*np.sin(np.radians(lat))
+        # self.state0[4] = a*np.sin(np.radians(170 + lon)) + b*np.cos(np.radians(170 + lon))*np.cos(np.radians(lat)) - c*np.cos(np.radians(170 + lon))*np.sin(np.radians(lat))
+        # self.state0[5] = b*np.sin(np.radians(lat)) + c*np.cos(np.radians(lat))
+        print(self.state0, lon, np.cos(np.radians(off + lon)))
 
-        t = np.linspace(0, 100000, 100000)
+        t = np.linspace(0, 10000, 10000)
         self.sol = odeint(self.projectile_motion, self.state0, t)
 
 
@@ -373,6 +382,7 @@ class World(object):
         self.curind += 100
 
         if self.curind >= len(self.sol) or self.sol[self.curind][0] ** 2 + self.sol[self.curind][1] ** 2 + self.sol[self.curind][2] ** 2 < R * R:
+            self.sol = self.sol[:self.curind]
             self.plot()
             print(1)
             return Task.done
@@ -387,8 +397,8 @@ class World(object):
 
 lat = 0
 lon = 0
-angle1 = 30
-angle2 = 40
+angle1 = 0
+angle2 = 0
 velo = 1000
 m = 1.0  # mass of the projectile (kg)
 A = 0.01  # cross-sectional area of the projectile (m^2)
