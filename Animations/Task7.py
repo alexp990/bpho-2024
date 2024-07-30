@@ -62,10 +62,12 @@ class Task7(Scene):
         
         # Create axes
         axes = Axes(
-            x_range=[0, np.max(x) * 1.1, 5],
+            x_range=[0, np.max(x) * 1.1, 20],
             y_range=[0, np.max(y) * 1.1, 5],
             axis_config={"color": BLUE},
         )
+
+        axes.add_coordinates()
 
         dots = [Dot(axes.c2p(x_coords, y_coords), color=RED, radius=0.03) for x_coords, y_coords in zip(x, y)]
 
