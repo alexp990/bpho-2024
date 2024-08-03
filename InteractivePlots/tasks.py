@@ -16,8 +16,9 @@ class Tasks:
         y_positions = [h]
         x_velocities = []
         y_velocities = []
-        vc = []
+        vc = [0]
         t = 0
+        time = [0]
 
         while True:
             t += dt
@@ -32,11 +33,12 @@ class Tasks:
             x_velocities.append(vx)
             y_velocities.append(vy)
             vc.append(v)
+            time.append(t)
             
             if y <= 0:
                 break
 
-        return x_positions, y_positions, x_velocities, y_velocities, vc, u_x, u_y
+        return x_positions, y_positions
 
     #----------------------------Analytical Model------------------------
 
@@ -47,14 +49,11 @@ class Tasks:
         tof = range / (u * np.cos(theta_rad))
         dx = range / step
 
-        u_x = u * np.cos(theta_rad)
-        u_y = u * np.sin(theta_rad)
-
         x_a = (u**2 / g) * np.sin(theta_rad)*np.cos(theta_rad)
         y_a = h + (u**2 / (2 * g)) * ((np.sin(theta_rad))**2)
 
-        x_pos = [0]
-        y_pos = [h]
+        x_positions = [0]
+        y_positions = [h]
 
         x = 0
 
@@ -63,13 +62,15 @@ class Tasks:
 
             y = h + x*np.tan(theta_rad) - (g / (2 * u ** 2)) * (1 + np.tan(theta_rad) ** 2) * x ** 2
 
-            x_pos.append(x)
-            y_pos.append(y)
+            x_positions.append(x)
+            y_positions.append(y)
 
             if y <= 0:
                 break
 
-        return x_pos, y_pos, tof, range, x_a, y_a, u_x, u_y
+        
+        
+        return np.array(x_positions), np.array(y_positions), x_a, y_a, tof, range
 
     #----------------------------To XY------------------------
 
@@ -119,23 +120,25 @@ class Tasks:
 
         x = 0
 
-        while True:
-            x += dx
-            y_high = h + x * np.tan(theta_rad_user_u_high) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_high)**2) * x**2
-            if y_high <= 0:
-                break
-            x_positions_user_u_high.append(x)
-            y_positions_user_u_high.append(y_high)
+        if user_u > u_min:
+            while True:
+                x += dx
+                y_high = h + x * np.tan(theta_rad_user_u_high) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_high)**2) * x**2
+                if y_high <= 0:
+                    break
+                x_positions_user_u_high.append(x)
+                y_positions_user_u_high.append(y_high)
 
         x = 0
 
-        while True:
-            x += dx
-            y_low = h + x * np.tan(theta_rad_user_u_low) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_low)**2) * x**2
-            if y_low <= 0:
-                break
-            x_positions_user_u_low.append(x)
-            y_positions_user_u_low.append(y_low)
+        if user_u > u_min:
+            while True:
+                x += dx
+                y_low = h + x * np.tan(theta_rad_user_u_low) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_low)**2) * x**2
+                if y_low <= 0:
+                    break
+                x_positions_user_u_low.append(x)
+                y_positions_user_u_low.append(y_low)
 
         return (
             u_min,
@@ -190,7 +193,7 @@ class Tasks:
         y_positions_user_u_low = [h]
 
         x_positions_bounding = [0]
-        y_positions_bounding = [(user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * 0**2]
+        y_positions_bounding = [((user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * 0**2) + h]
 
         x_positions_max_range = [0]
         y_positions_max_range = [h]
@@ -206,34 +209,34 @@ class Tasks:
             y_positions_min_u.append(y_min_u)
 
         x = 0
-
-        while True:
-            x += dx
-            y_high = h + x * np.tan(theta_rad_user_u_high) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_high)**2) * x**2
-            if y_high <= 0:
-                break
-            x_positions_user_u_high.append(x)
-            y_positions_user_u_high.append(y_high)
-
-        x = 0
-
-        while True:
-            x += dx
-            y_bound = (user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * x**2
-            x_positions_bounding.append(x)
-            y_positions_bounding.append(y_bound)
-            if y_bound <= 0:
-                break
+        if user_u > u_min:
+            while True:
+                x += dx
+                y_high = h + x * np.tan(theta_rad_user_u_high) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_high)**2) * x**2
+                if y_high <= 0:
+                    break
+                x_positions_user_u_high.append(x)
+                y_positions_user_u_high.append(y_high)
 
         x = 0
+        if user_u > u_min:
+            while True:
+                x += dx
+                y_bound = (user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * x**2
+                x_positions_bounding.append(x)
+                y_positions_bounding.append(y_bound + h)
+                if y_bound + h <= 0:
+                    break
 
-        while True:
-            x += dx
-            y_low = h + x * np.tan(theta_rad_user_u_low) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_low)**2) * x**2
-            if y_low <= 0:
-                break
-            x_positions_user_u_low.append(x)
-            y_positions_user_u_low.append(y_low)
+        x = 0
+        if user_u > u_min:
+            while True:
+                x += dx
+                y_low = h + x * np.tan(theta_rad_user_u_low) - (g / (2 * user_u**2)) * (1 + np.tan(theta_rad_user_u_low)**2) * x**2
+                if y_low <= 0:
+                    break
+                x_positions_user_u_low.append(x)
+                y_positions_user_u_low.append(y_low)
 
         x = 0
 

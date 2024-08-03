@@ -96,7 +96,7 @@ def projectile_motion(g, X, Y, step, h):
         y_positions_user_u_low.append(y_low)
 
     x_positions_bounding = [0]
-    y_positions_bounding = [(user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * 0**2]
+    y_positions_bounding = [((user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * 0**2) + h]
 
     x = 0
 
@@ -104,8 +104,8 @@ def projectile_motion(g, X, Y, step, h):
         x += dx
         y_bound = (user_u**2 / (2 * g)) - (g / (2 * user_u**2)) * x**2
         x_positions_bounding.append(x)
-        y_positions_bounding.append(y_bound)
-        if y_bound <= 0:
+        y_positions_bounding.append(y_bound + h)
+        if y_bound + h <= 0:
             break
 
     x = 0
@@ -135,7 +135,7 @@ def projectile_motion(g, X, Y, step, h):
         text.set_visible(visibility)
     plt.draw()"""
 
-step = 1000  
+step = 10000
 g = 9.81
 h = float(input("Enter starting height in meters"))
 X = float(input("Enter the X coordinate of the target point: "))
@@ -172,5 +172,6 @@ ax.set_ylabel('Vertical Displacement (m)', fontsize=14)
 ax.grid(True, linestyle='--', linewidth=0.5)
 ax.legend()
 
+print(x_positions_bounding)
 
 plt.show()
