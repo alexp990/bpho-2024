@@ -264,12 +264,12 @@ class Tasks:
     
     #----------------------------Min Max Range Graph------------------------
        
-    class Task6:
+    class Task7:
 
         def r(self, u, theta, g, t):
             return np.sqrt(u**2 * t**2 - g * t**3 * u * np.sin(theta) + 0.25 * g**2 * t**4)
 
-        def compute_t_min(self, u, theta, g):
+        def compute_t_max(self, u, theta, g):
             discriminant = (9 * u**2 * np.sin(theta)**2) / (4 * g**2) - (2 * u**2) / (g**2)
             if discriminant < 0:
                 return None
@@ -280,7 +280,7 @@ class Tasks:
             else:
                 return None  
 
-        def compute_t_max(self, u, theta, g):
+        def compute_t_min(self, u, theta, g):
             discriminant = (9 * u**2 * np.sin(theta)**2) / (4 * g**2) - (2 * u**2) / (g**2)
             if discriminant < 0:
                 return None
@@ -291,7 +291,7 @@ class Tasks:
             else:
                 return None 
 
-        def projectile_motion(self, h, u, theta, g, t):
+        def projectile_motion(self, u, theta, g, t):
             x = u * t * np.cos(theta)
             y = u * t * np.sin(theta) - 0.5 * g * t**2
             return x, y
@@ -299,7 +299,7 @@ class Tasks:
 
     #----------------------------Verlet Trajectory Solver------------------------
 
-    def task7(self, h, u, theta, dt, g, N, C):
+    def task8(self, h, u, theta, dt, g, N, C):
             theta = np.deg2rad(theta)
             
             nbounce = 0
@@ -345,7 +345,7 @@ class Tasks:
     
     #----------------------------Air Resistance and No Air Resistance------------------------
     
-    class Task8:
+    class Task9:
 
         def __init__(self, g, dt):
             self.g = g

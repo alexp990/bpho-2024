@@ -1,4 +1,5 @@
-from tasks import Tasks
+from tokenize import PlainToken
+from tasks import Tasks 
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 import numpy as np
@@ -230,7 +231,74 @@ def plot_task_3_and_5(h, user_u, step, g, X, Y):
 
     plt.show()
 
+def plot_task_7(u, dt, g):
 
+    task6 = Tasks.Task7()
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.95, bottom=0.3)
+
+    theta_degrees = np.arange(45, 90, 5)
+
+    for theta_deg in theta_degrees:
+        theta = np.deg2rad(theta_deg)
+        range = u**2/g * (np.sin(theta)*np.cos(theta) + np.cos(theta)*np.sqrt(np.square(np.sin(theta)) + (2*g*h)/(np.square(u)))) 
+        tof = range / (u*np.cos(theta))
+        ts = np.arange(0, tof, dt)
+        range_values = task6.r(u, theta, g, ts)
+        
+        t_max = task6.compute_t_max(u, theta, g)
+        t_min = task6.compute_t_min(u, theta, g)
+
+        if t_max is not None and t_min is not None:
+            range_max = task6.r(u, theta, g, t_max) 
+            range_min = task6.r(u, theta, g, t_min) 
+
+            ax1.scatter([t_max], [range_max], color='blue', zorder=3, s=15, marker='X', label=rf'Maxima at at $\approx$ ({round(t_max)}, {round(range_max)})')
+            ax1.scatter([t_min], [range_min], color='red', zorder=3, s=15, marker='X', label=rf'Minima at at $\approx$ ({round(t_min)}, {round(range_min)})')
+
+        ax1.plot(ts, range_values, label=f'θ = {theta_deg}°')
+
+    ax1.legend(loc='upper left')
+    ax1.set_title("Range vs Time")
+    ax1.set_xlabel('Time (s)')
+    ax1.set_ylabel('Range (m)')
+    ax1.grid(True)
+
+    for theta_deg in theta_degrees:
+        theta = np.deg2rad(theta_deg)
+        range = u**2/g * (np.sin(theta)*np.cos(theta) + np.cos(theta)*np.sqrt(np.square(np.sin(theta)) + (2*g*h)/(np.square(u)))) 
+        tof = range / (u*np.cos(theta))
+        ts = np.arange(0, tof, dt)
+
+        x_positions = []
+        y_positions = []
+
+        for t in ts:
+            x, y = task6.projectile_motion(u, theta, g, t)
+            x_positions.append(x)
+            y_positions.append(y)
+
+        t_max = task6.compute_t_max(u, theta, g)
+        t_min = task6.compute_t_min(u, theta, g)
+
+        if t_max is not None and t_min is not None:
+            x_max, y_max = task6.projectile_motion(u, theta, g, t_max)
+            x_min, y_min = task6.projectile_motion(u, theta, g, t_min)
+            ax2.scatter([x_max], [y_max], color='blue', zorder=3, s=15, marker='X', label=rf'Maxima at at $\approx$ ({round(x_max)}, {round(y_max)})')
+            ax2.scatter([x_min], [y_min], color='red', zorder=3, s=15, marker='X', label=rf'Maxima at at $\approx$ ({round(x_min)}, {round(y_min)})')
+
+        ax2.plot(x_positions, y_positions, label=f'θ = {theta_deg}°')
+
+    ax2.set_title("Displacement")
+    ax2.set_xlabel('x displacement (m)')
+    ax2.set_ylabel('y displacement (m)')
+    ax2.legend()
+    ax2.grid(True)
+
+    plt.tight_layout()
+
+    plt.show()       
 
 h = 10
 u = 60
@@ -244,6 +312,8 @@ Y = 100
 #plot_task_2(h, u, theta, step, g)
 #plot_task_3(h, u, step, g, X, Y)
 
-plot_task_3_and_5(h, u, step, g, X, Y)
+#plot_task_3_and_5(h, u, step, g, X, Y)
+
+#plot_task_7(h, u, dt, g)
 
 
