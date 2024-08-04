@@ -132,6 +132,8 @@ def plot_task_2(h, u, theta, step, g):
 
     plt.show()
 
+
+
 def plot_task_3_and_5(h, user_u, step, g, X, Y):
 
     fig, ax1 = plt.subplots(figsize=(8, 6))

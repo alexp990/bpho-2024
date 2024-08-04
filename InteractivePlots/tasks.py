@@ -150,7 +150,97 @@ class Tasks:
             x_positions_user_u_high, y_positions_user_u_high,
             x_positions_user_u_low, y_positions_user_u_low           
         )
+    
+    
+    def task4(self, h, u, theta, step, g):
 
+        theta_rad = np.deg2rad(theta)
+        theta_rad_max_r = np.arcsin(1/(np.sqrt(2 + 2*g*h/u**2)))
+
+        range = u**2/g * (np.sin(theta_rad)*np.cos(theta_rad) + np.cos(theta_rad)*np.sqrt(np.square(np.sin(theta_rad)) + (2*g*h)/(np.square(u))))
+        range_max = (u**2 / g) * (np.sqrt(1 + (2*g*h)/u**2))
+
+        tof = range / (u * np.cos(theta_rad))
+        dx = range / step
+
+        tof_max_r = range_max / (u * np.cos(theta_rad_max_r))
+        dx_max_r = range_max / step
+
+        x_a = (u**2 / g) * np.sin(theta_rad)*np.cos(theta_rad)
+        y_a = h + (u**2 / (2 * g)) * ((np.sin(theta_rad))**2)
+
+        x_a_max_r = (u**2 / g) * np.sin(theta_rad_max_r)*np.cos(theta_rad_max_r)
+        y_a_max_r = h + (u**2 / (2 * g)) * ((np.sin(theta_rad_max_r))**2)
+
+        x_positions = [0]
+        y_positions = [h]
+
+        x_positions_max_range = [0]
+        y_positions_max_range = [h]
+
+        x = 0
+
+        while True:
+            x = x + dx
+
+            y = h + x*np.tan(theta_rad) - (g / (2 * u ** 2)) * (1 + np.tan(theta_rad) ** 2) * x ** 2
+
+            x_positions.append(x)
+            y_positions.append(y)
+
+            if y <= 0:
+                break
+
+        x = 0
+
+        while True:
+            x = x + dx_max_r
+
+            y = h + x*np.tan(theta_rad_max_r) - (g / (2 * u ** 2)) * (1 + np.tan(theta_rad_max_r) ** 2) * x ** 2
+
+            x_positions_max_range.append(x)
+            y_positions_max_range.append(y)
+
+            if y <= 0:
+                break
+
+        return np.array(x_positions), np.array(y_positions), np.array(x_positions_max_range), np.array(y_positions_max_range), x_a, y_a, x_a_max_r, y_a_max_r, range, range_max, tof, tof_max_r, theta, np.rad2deg(theta_rad_max_r)
+
+
+    def task4_surface_plots(self):
+
+        def projectile_motion(h, u, g=9.81):
+            theta_max_range = np.arcsin(1 / np.sqrt(2 + (2 * g * h) / u**2))
+            max_range = (u**2 / g) * (1 + np.sqrt(1 + 2 * g * h / u**2))
+            max_height = h + (u * np.sin(theta_max_range))**2 / (2 * g)
+            return max_range, np.rad2deg(theta_max_range), max_height
+
+        def Rg_u2(theta, alpha):
+            theta_rad = np.radians(theta)
+            return np.sin(theta_rad) * np.cos(theta_rad) + np.cos(theta_rad) * np.sqrt(np.sin(theta_rad)**2 + alpha)
+
+        u_values = np.linspace(1, 50, 200)
+        h_values = np.linspace(0, 50, 200)
+        theta_values = np.linspace(0, 90, 100)
+        alpha_values = range(11)
+        Rg_u2_theta_values = []
+
+        max_range = np.zeros((len(h_values), len(u_values)))
+        launch_elevation = np.zeros((len(h_values), len(u_values)))
+        Rg_u2_values = np.zeros((len(h_values), len(u_values)))
+
+        for i, u in enumerate(u_values):
+            for j, h in enumerate(h_values):
+                R, theta, H = projectile_motion(h, u)
+                max_range[j, i] = R
+                launch_elevation[j, i] = theta
+                Rg_u2_values[j, i] = R * 9.81 / u**2
+
+        for alpha in alpha_values:
+            Rg_u2_theta_values.append(Rg_u2(theta_values, alpha))
+
+
+        return max_range, launch_elevation, Rg_u2_values, alpha_values, h_values, theta_values, u_values, Rg_u2_theta_values, alpha_values
 
     #----------------------------Bounding Parabola to XY------------------------
 
