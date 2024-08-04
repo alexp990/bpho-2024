@@ -12,7 +12,7 @@ class Task7(Scene):
         dt = 1/25  # Time step (s)
         theta = 45.0  # Initial launch angle in degrees
         u = 20.0   # Initial speed of object in m/s
-
+-
         def verlet_trajectory_solver(N, C, g, dt, h, theta, u):
             theta = np.deg2rad(theta)
             
