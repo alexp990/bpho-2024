@@ -9,6 +9,8 @@ class Tasks:
 
         theta_rad = np.radians(theta)
 
+        range_ = u**2/g * (np.sin(theta_rad)*np.cos(theta_rad) + np.cos(theta_rad)*np.sqrt(np.square(np.sin(theta_rad)) + (2*g*h)/(np.square(u))))
+
         u_x = u * np.cos(theta_rad)
         u_y = u * np.sin(theta_rad)
 
@@ -38,7 +40,7 @@ class Tasks:
             if y <= 0:
                 break
 
-        return x_positions, y_positions
+        return x_positions, y_positions, range_
 
     #----------------------------Analytical Model------------------------
 
@@ -256,20 +258,37 @@ class Tasks:
         b_u = -1 * X
         c_u = Y - h + (g * X**2) / (2 * user_u**2)
 
+
         theta_rad_min_u = np.arctan((-b_m + np.sqrt(b_m**2 - 4*a_m*c_m)) / (2*a_m)) 
         theta_deg_min_u = np.rad2deg(theta_rad_min_u)
 
-        theta_rad_user_u_high = np.arctan((-b_u + np.sqrt(b_u**2 - 4*a_u*c_u)) / (2*a_u)) 
-        theta_deg_user_u_high = np.rad2deg(theta_rad_user_u_high)
+        if user_u > u_min:
+            theta_rad_user_u_high = np.arctan((-b_u + np.sqrt(b_u**2 - 4*a_u*c_u)) / (2*a_u)) 
+            theta_deg_user_u_high = np.rad2deg(theta_rad_user_u_high)
 
-        theta_rad_user_u_low = np.arctan((-b_u - np.sqrt(b_u**2 - 4*a_u*c_u)) / (2*a_u)) 
-        theta_deg_user_u_low = np.rad2deg(theta_rad_user_u_low)
+            theta_rad_user_u_low = np.arctan((-b_u - np.sqrt(b_u**2 - 4*a_u*c_u)) / (2*a_u)) 
+            theta_deg_user_u_low = np.rad2deg(theta_rad_user_u_low)
+        else:                  
+            theta_rad_user_u_high = np.deg2rad(0)
+            theta_deg_user_u_high = 0
+
+            theta_rad_user_u_low = np.deg2rad(0)
+            theta_deg_user_u_low = 0
+
 
         alpha = 2*g*h / user_u**2
         theta_rad_max_range = 1 / np.sqrt(2 + alpha)
         theta_deg_max_range = np.rad2deg(theta_rad_max_range)
 
         range_min_u = u_min**2 / g * (np.sin(theta_rad_min_u) * np.cos(theta_rad_min_u) + np.cos(theta_rad_min_u) * np.sqrt(np.square(np.sin(theta_rad_min_u)) + (2 * g * h) / (np.square(u_min))))
+        if user_u > u_min:
+            range_high = user_u**2 / g * (np.sin(theta_rad_user_u_high) * np.cos(theta_rad_user_u_high) + np.cos(theta_rad_user_u_high) * np.sqrt(np.square(np.sin(theta_rad_user_u_high)) + (2 * g * h) / (np.square(user_u))))
+            range_low = user_u**2 / g * (np.sin(theta_rad_user_u_low) * np.cos(theta_rad_user_u_low) + np.cos(theta_rad_user_u_low) * np.sqrt(np.square(np.sin(theta_rad_user_u_low)) + (2 * g * h) / (np.square(user_u))))
+        else:
+            range_high = 0
+            range_low = 0
+        range_max = user_u**2 / g * (np.sin(theta_rad_max_range) * np.cos(theta_rad_max_range) + np.cos(theta_rad_max_range) * np.sqrt(np.square(np.sin(theta_rad_max_range)) + (2 * g * h) / (np.square(user_u))))
+
 
         dx = range_min_u / step
 
@@ -344,7 +363,7 @@ class Tasks:
             theta_deg_user_u_high,
             theta_deg_user_u_low,
             theta_deg_max_range,
-            range_min_u ,
+            range_min_u, range_high, range_low, range_max,
             x_positions_min_u, y_positions_min_u,
             x_positions_user_u_high, y_positions_user_u_high,
             x_positions_user_u_low, y_positions_user_u_low,
@@ -352,6 +371,22 @@ class Tasks:
             x_positions_max_range, y_positions_max_range           
         )
     
+    #----------------------------Total Distance Travelled by Projectile------------------------
+    
+    def trajectory_length(self, u, theta, range, g):
+
+        def z_func(z):
+            return 0.5 * np.log(np.abs(np.sqrt(1 + z**2) + z)) + 0.5 * z * np.sqrt(1 + z**2)
+        
+        tan_theta = np.tan(theta)
+        z1 = tan_theta
+        z2 = tan_theta - (g*range / u**2)*(1 + tan_theta**2)
+        
+        a = (u**2) / (g * (1 + tan_theta**2))
+        s = a * (z_func(z1) - z_func(z2))
+    
+        return s
+
     #----------------------------Min Max Range Graph------------------------
        
     class Task7:
