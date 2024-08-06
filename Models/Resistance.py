@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RadioButtons
 
 def k_factor(C_d, rho, cs_area, m):
-    return (0.5 * C_d * rho * cs_area) / m
+    return ((0.5 * C_d * rho * cs_area) / m)
 
 def with_air_resistance(v0, h, C_d, rho, cs_area, m, angle):
 
     theta = np.deg2rad(angle)
 
     k = k_factor(C_d, rho, cs_area, m)
+    print(k)
     vx0 = v0 * np.cos(np.radians(angle))
     vy0 = v0 * np.sin(np.radians(angle))
     x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
@@ -19,7 +20,7 @@ def with_air_resistance(v0, h, C_d, rho, cs_area, m, angle):
         t.append(t[-1] + dt)
         v = np.sqrt(vx[-1]**2 + vy[-1]**2)
 
-        ax = - (vx[-1] / v) * k * v**2
+        ax = -(vx[-1] / v) * k * v**2
         ay = -g - (vy[-1] / v) * k * v**2
 
         x.append(x[-1] + vx[-1] * dt + 0.5 * ax * dt**2)

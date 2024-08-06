@@ -6,8 +6,10 @@ import numpy as np
 import sys
 from tkinter import font
 from tasks import Tasks
+from matplotlib.animation import FuncAnimation
 
 tasks = Tasks()
+
 
 class PlotApp:
     def __init__(self, root):
@@ -17,8 +19,8 @@ class PlotApp:
         self.current_plot_type = 'Exact Model'
         self.current_plot_subtype = ''
 
-        root.state('zoomed') 
-        self.root.attributes('-fullscreen', True)
+        #root.state('zoomed') 
+        #self.root.attributes('-fullscreen', True)
         self.root.bind("<Escape>", self.exit_app)  
 
         self.start_x = None
@@ -40,8 +42,6 @@ class PlotApp:
         self.drag_start_y = None
 
         self.autoscale = True
-
-        self.g = 9.81
         
 
         self.root.grid_rowconfigure(0, weight=1)
@@ -105,22 +105,94 @@ class PlotApp:
         self.info_box5.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
         self.info_box6.grid(row=1, column=2, padx=10, pady=10, sticky="nsew")
 
+
+        """self.n_of_bounces_label = tk.Label(self.info_box2, height=1, width=2, compound='c', text="N:", font=("Helvetica", 20))
+        self.n_of_bounces_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        self.n_of_bounces_label_input = tk.Label(self.info_box2, height=1, width=2, compound='c', text=self.N, font=("Helvetica", 20))
+        self.n_of_bounces_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.n_of_bounces_label_input.bind("<Button-1>", self.switch_to_text_n_bounces)"""
+
+        self.info_box2.grid_columnconfigure(0, weight=1)
+        self.info_box2.grid_columnconfigure(1, weight=1)
+        self.info_box2.grid_rowconfigure(0, weight=1)
+
+        """self.c_label = tk.Label(self.info_box3, height=1, width=1, compound='c', text="C:", font=("Helvetica", 20))
+        self.c_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        self.c_label_input = tk.Label(self.info_box3, height=1, width=1, compound='c', text=self.C, font=("Helvetica", 20))
+        self.c_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.c_label_input.bind("<Button-1>", self.switch_to_text_c)"""
+
+        self.info_box3.grid_columnconfigure(0, weight=1)
+        self.info_box3.grid_columnconfigure(1, weight=1)
+        self.info_box3.grid_rowconfigure(0, weight=1)
+
         self.g_label_frame.grid_columnconfigure(0, weight=1)
         self.g_label_frame.grid_columnconfigure(1, weight=1)
-        self.g_label_frame.grid_rowconfigure(0, weight=1)
+        self.g_label_frame.grid_rowconfigure(0, weight=1)    
 
-        self.g_label = tk.Label(self.g_label_frame, height=1, width=2, compound='c', text="g (m/s^2):", font=("Helvetica", 36))
+        """self.g_label = tk.Label(self.g_label_frame, height=1, width=1, compound='c', text="g:", font=("Helvetica", 20))
         self.g_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        self.g_label_input = tk.Label(self.g_label_frame, height=1, width=2, compound='c', text=self.g, font=("Helvetica", 36))
+        self.g_label_input = tk.Label(self.g_label_frame, height=1, width=1, compound='c', text=self.g, font=("Helvetica", 20))
         self.g_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.g_label_input.bind("<Button-1>", self.switch_to_text)
+        self.g_label_input.bind("<Button-1>", self.switch_to_text_g)"""
+
+        """self.n_of_bounces_label = EditableLabel(self.info_box2, text=f"N: {self.N}", font=("Helvetica", 30))
+        self.n_of_bounces_label.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+
+        self.c_label = EditableLabel(self.info_box3, text=f"C: {self.C}", font=("Helvetica", 30))
+        self.c_label.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+
+        self.g_label = EditableLabel(self.g_label_frame, text=f"g (m/s^2): {self.g}", font=("Helvetica", 30))
+        self.g_label.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")   """
+
+
+        # Initialize DoubleVar instances with default values
+        self.g = tk.DoubleVar(value=9.8)  # Example default value
+        self.N = tk.DoubleVar(value=5)    # Example default value
+        self.C = tk.DoubleVar(value=0.8)
+
+        # Create multiple NumberEntryWidget instances
+        self.create_number_entry_widget(
+            self.g_label_frame, 
+            "Enter g:", 
+            "g = ", 
+            self.g,
+            self.g.get()
+        )
+
+        self.create_number_entry_widget(
+            self.info_box3, 
+            "Enter C (coefficient of restitution):", 
+            "C = ", 
+            self.C,
+            self.C.get()
+        )
+
+        self.create_number_entry_widget(
+            self.info_box2, 
+            "Enter N (number of bounces simulated):", 
+            "N = ", 
+            self.N,
+            self.N.get()
+        )
+
+
 
         self.info_box4.grid_columnconfigure(0, weight=1)
         self.info_box4.grid_rowconfigure(0, weight=1)
-        self.toggle_range_button = tk.Button(self.info_box4, text="Toggle distance travelled\nby projectile", command=self.toggle_distance_travelled_by_projectile, font=("Helvetica", 34), height=2, width=1)
+        self.toggle_range_button = tk.Button(self.info_box4, text="Toggle distance travelled\nby projectile", command=self.toggle_distance_travelled_by_projectile, font=("Helvetica", 30), height=2, width=1)
         self.toggle_range_button.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
 
         self.distance_travelled_by_projectile_var = True
+
+        self.info_box5.grid_columnconfigure(0, weight=1)
+        self.info_box5.grid_rowconfigure(0, weight=1)
+        self.toggle_animation_button = tk.Button(self.info_box5, text="Toggle animation", command=self.toggle_animation, font=("Helvetica", 34), height=2, width=1)
+        self.toggle_animation_button.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
+        self.animation_button_visible = False
+        self.toggle_animation_button.grid_forget()
+
+        self.toggle_animation_var = False
 
         self.buttons_frame.grid_rowconfigure(0, weight=1)
         self.buttons_frame.grid_rowconfigure(1, weight=1)
@@ -162,6 +234,34 @@ class PlotApp:
 
         self.update_plot()
 
+    def create_number_entry_widget(self, frame, title_text, result_text, variable_to_update, initial_value):
+
+        title_label = tk.Label(frame, text=title_text, font=("Helvetica", 25))
+        title_label.pack(pady=10)
+
+        number_entry = tk.Entry(frame, font=("Helvetica", 22), textvariable=variable_to_update)
+        number_entry.pack(pady=5)
+
+        result_label = tk.Label(frame, text=f"{result_text} {initial_value}", font=("Helvetica", 24), height=1)
+        result_label.pack(pady=5)
+
+        def display_number(event=None):
+
+            number = variable_to_update.get()
+
+            result_label.config(text=f"{result_text} {number}")
+
+            self.update_plot()
+
+        number_entry.bind("<Return>", display_number)
+        
+        return frame
+
+    def toggle_animation(self):
+        self.toggle_animation_var = not self.toggle_animation_var
+        self.update_plot()
+
+
     def toggle_distance_travelled_by_projectile(self):
         self.distance_travelled_by_projectile_var = not self.distance_travelled_by_projectile_var 
                 
@@ -174,45 +274,72 @@ class PlotApp:
             distances_flown.append(d_flown)
         return distances_flown
 
-    def switch_to_text(self, event):
+    """def switch_to_text_n_bounces(self, event):
+        text = self.n_of_bounces_label_input.cget("text")
+        self.n_of_bounces_label_input.grid_forget()
+        self.text_n_bounces = tk.Text(self.info_box2, font=('Helvetica', 10), height=1, width=1)
+        self.text_n_bounces.insert(tk.END, text)
+        self.text_n_bounces.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.text_n_bounces.focus()
+        self.text_n_bounces.bind("<Return>", self.save_input_n_bounces)
 
+    def switch_to_text_c(self, event):
+        text = self.c_label_input.cget("text")
+        self.c_label_input.grid_forget()
+        self.text_c = tk.Text(self.info_box3, font=('Helvetica', 10), height=1, width=1)
+        self.text_c.insert(tk.END, text)
+        self.text_c.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.text_c.focus()
+        self.text_c.bind("<Return>", self.save_input_c)
+
+    def switch_to_text_g(self, event):
         text = self.g_label_input.cget("text")
-
         self.g_label_input.grid_forget()
-        self.text = tk.Text(self.g_label_frame, font=('Helvetica', 36), height=1, width=2)
-        self.text.insert(tk.END, text)
-        self.text.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.text_g = tk.Text(self.g_label_frame, font=('Helvetica', 10), height=1, width=1)
+        self.text_g.insert(tk.END, text)
+        self.text_g.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.text_g.focus()
+        self.text_g.bind("<Return>", self.save_input_g)
 
-        self.text.focus()
-
-        self.text.bind("<Return>", self.save_input)
-
-    def save_input(self, event):
-
-        input_text = self.text.get("1.0", tk.END).strip() 
-
-        self.text.grid_forget()
-        self.g_label_input = tk.Label(self.g_label_frame, text=f"{input_text}", font=('Helvetica', 36))
-        self.g_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-
-        self.g_label_input.bind("<Button-1>", self.switch_to_text)
-
-        self.g = float(input_text)
-
+    def save_input_n_bounces(self, event):
+        input_text = self.text_n_bounces.get("1.0", tk.END).strip()
+        self.text_n_bounces.grid_forget()
+        self.n_of_bounces_label_input = tk.Label(self.info_box2, text=f"{int(input_text)}", font=('Helvetica', 20))
+        self.n_of_bounces_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.n_of_bounces_label_input.bind("<Button-1>", self.switch_to_text_n_bounces)
+        self.N = int(input_text)
         self.update_plot()
+
+    def save_input_c(self, event):
+        input_text = float(self.text_c.get("1.0", tk.END).strip())
+        if input_text > 1:
+            input_text = self.C
+        self.text_c.grid_forget()
+        self.c_label_input = tk.Label(self.info_box3, text=f"{input_text}", font=('Helvetica', 20))
+        self.c_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+        self.c_label_input.bind("<Button-1>", self.switch_to_text_c)
+        self.C = input_text
+        self.update_plot()
+
+    def save_input_g(self, event):
+        input_text = self.text_g.get("1.0", tk.END).strip()
+        self.text_g.grid_forget()
+        self.g_label_input = tk.Label(self.g_label_frame, text=f"{input_text}", font=('Helvetica', 20))
+        self.g_label_input.grid(row=0, column=1, padx=5, pady=5)
+        self.g_label_input.bind("<Button-1>", self.switch_to_text_g)
+        self.g = float(input_text)
+        self.update_plot()"""
 
 
     def track_mouse_position(self, event):
-        # Get mouse coordinates
+
         x, y = event.x_root, event.y_root
 
-        # Get bounding box of the canvas
         bbox = self.canvas_widget.bbox(tk.ALL)
         if bbox is None:
             print("Bounding box is None")
             return False
 
-        # Unpack bounding box coordinates
         plot_area_x0, plot_area_y0, plot_area_x1, plot_area_y1 = bbox
 
 
@@ -248,6 +375,7 @@ class PlotApp:
 
             self.drag_start_x = event.x
             self.drag_start_y = event.y
+
 
     def on_mouse_up(self, event):
         self.drag_start_x = None
@@ -316,7 +444,7 @@ class PlotApp:
         self.h_slider = self.create_slider(self.sliders_frame, 'h (m)', 0.0, 30.0, 5.0, self.update_plot, 0)
         self.u_slider = self.create_slider(self.sliders_frame, 'u (m/s)', 1.0, 100.0, 10.0, self.update_plot, 1)
         self.theta_slider = self.create_slider(self.sliders_frame, 'theta (deg)', 1.0, 90.0, 45.0, self.update_plot, 2)
-        self.mass_slider = self.create_slider(self.sliders_frame, 'm (kg)', 1.0, 40.0, 20.0, self.update_plot, 3)
+        self.mass_slider = self.create_slider(self.sliders_frame, 'm (kg)', 0.01, 10.0, 0.01, self.update_plot, 3)
 
         self.h_slider.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
         self.u_slider.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
@@ -343,6 +471,14 @@ class PlotApp:
 
         label_widget = ttk.Label(frame, text=label, font=("Arial", 25))
         label_widget.grid(row=0, column=row, pady=(0, 10)) 
+
+        if min_val == 0.01:
+            slider_font = font.Font(size=25)
+            slider = tk.Scale(frame, from_=max_val, to=min_val, orient=tk.VERTICAL, resolution=0.01, length=900, sliderlength=80, width=200, font=slider_font, troughcolor='lightblue', command=lambda val: update_func())
+            slider.set(init_val)
+
+            return slider
+
 
         slider_font = font.Font(size=25)
         slider = tk.Scale(frame, from_=max_val, to=min_val, orient=tk.VERTICAL, resolution=0.5, length=900, sliderlength=80, width=200, font=slider_font, troughcolor='lightblue', command=lambda val: update_func())
@@ -423,6 +559,11 @@ class PlotApp:
             plot_subtypes = []
             self.current_plot_subtype = ''
 
+        if self.current_plot_type != 'Ball Bounces Model':
+
+            self.animation_button_visible = False
+
+
         self.reset_textboxes()
 
         # Update the plot subtype menu
@@ -461,6 +602,12 @@ class PlotApp:
 
     def update_plot(self):
         self.ax.clear()
+        
+        #print(self.current_plot_type)
+        #print(self.animation_button_visible)
+
+        if self.animation_button_visible == False:
+            self.toggle_animation_button.grid_forget()
 
 
         h = self.h_slider.get()
@@ -469,7 +616,7 @@ class PlotApp:
         mass = self.mass_slider.get()
         X = self.X_slider.get()
         Y = self.Y_slider.get()
-        g = self.g
+        g = self.g.get()
         step = 1000
         dt = 1/1000
 
@@ -748,15 +895,108 @@ class PlotApp:
                 self.ax.legend(fontsize=28)
                 self.ax.grid(True)
  
+        elif self.current_plot_type == 'Ball Bounces Model':
+ 
+            self.animation_button_visible = True
+
+            if self.animation_button_visible == True:
+                self.toggle_animation_button.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
+
+            print("animation button visible")
+
+            N = self.N.get()     # Maximum number of bounces
+            C = self.C.get()   # Coefficient of restitution
+            dt = 1/25  # Time step (s)
+
+            t, x, y, vx, vy = tasks.task8(h, u, theta, dt, g, N, C)
+
+            self.ax.set_xlim(0, np.max(x) * 1.1)
+            self.ax.set_ylim(0, np.max(y) * 1.1)
+
+            self.ax.set_xlabel('Distance (m)')
+            self.ax.set_ylabel('Height (m)')
+            self.ax.set_title('Projectile Trajectory Animation with Bounces (Verlet Method)')
+
+
+            if self.toggle_animation_var == True:
+                line, = self.ax.plot([], [], '.', lw=0.1)
+
+                def update(frame):
+                    line.set_data(x[:frame], y[:frame])
+                    return line,
+
+                ani = FuncAnimation(self.fig, update, frames=len(t), interval=1, blit=True)
+
+            else:
+                self.ax.plot(x, y)
+
 
         elif self.current_plot_type == 'Air Resistance Model':
-            if self.current_plot_subtype == 'y vs x':
-                x = np.linspace(0, 10, 100)
-                y = np.tan(x)
-                self.ax.plot(x, y)
-                self.ax.set_title('Y vs X')
 
-        if self.autoscale:
+            task9 = Tasks.Task9(g, dt)
+
+            C_d = 0.1  # Drag coefficient
+            rho = 1  # Air density (kg/m^3)
+            cs_area = 0.007  # Cross-sectional area (m^2)
+            dt = 0.01 
+            v0 = u  
+            m = mass
+            angle = theta
+
+            xnr, ynr, vnr, vxnr, vynr, tnr  = task9.without_air_resistance(v0, h, angle)
+            xr, yr, vr, vxr, vyr, tr = task9.with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)
+
+            if self.current_plot_subtype == 'y vs x':
+
+                self.ax.plot(xnr, ynr, label='No air R', linestyle='-', color='blue')
+                self.ax.plot(xr, yr, label='Air R', linestyle='--', color='red')
+                self.ax.set_xlabel('Distance (m)', fontsize=22)
+                self.ax.set_ylabel('Height (m)', fontsize=22)
+                self.ax.set_title('X vs Y', fontsize=28)
+                self.ax.legend(fontsize=28)
+                self.ax.grid(True)
+            
+            elif self.current_plot_subtype == 'y vs t':
+
+                self.ax.plot(tnr, ynr, label='No air R', linestyle='-', color='blue')
+                self.ax.plot(tr, yr, label='Air R', linestyle='--', color='red')
+                self.ax.set_xlabel('Time (s)', fontsize=22)
+                self.ax.set_ylabel('Height (m)', fontsize=22)
+                self.ax.set_title('Y vs T', fontsize=28)
+                self.ax.legend(fontsize=28)       
+                self.ax.grid(True)
+
+            elif self.current_plot_subtype == 'vx vs t':
+
+                self.ax.plot(tnr, vxnr, label='No air R', linestyle='-', color='blue')
+                self.ax.plot(tr, vxr, label='Air R', linestyle='--', color='red')
+                self.ax.set_xlabel('Time (s)', fontsize=22)
+                self.ax.set_ylabel('Velocity in X (m/s)', fontsize=22)
+                self.ax.set_title('VX vs T', fontsize=28)
+                self.ax.legend(fontsize=28) 
+                self.ax.grid(True)
+
+            elif self.current_plot_subtype == 'vy vs t':
+            
+                self.ax.plot(tnr, vynr, label='No air R', linestyle='-', color='blue')
+                self.ax.plot(tr, vyr, label='Air R', linestyle='--', color='red')
+                self.ax.set_xlabel('Time (s)', fontsize=22)
+                self.ax.set_ylabel('Velocity in Y (m/s)', fontsize=22)
+                self.ax.set_title('VY vs T', fontsize=28)
+                self.ax.legend(fontsize=28) 
+                self.ax.grid(True)
+
+            elif self.current_plot_subtype == 'v vs t':
+
+                self.ax.plot(tnr, vnr, label='No air R', linestyle='-', color='blue')
+                self.ax.plot(tr, vr, label='Air R', linestyle='--', color='red')
+                self.ax.set_xlabel('Time (s)', fontsize=22)
+                self.ax.set_ylabel('Velocity (m/s)', fontsize=22)
+                self.ax.set_title('V vs T', fontsize=28)
+                self.ax.legend(fontsize=28)     
+                self.ax.grid(True)            
+
+        if self.autoscale and self.current_plot_type != 'Ball Bounces Model':
             self.ax.autoscale()
         if not self.autoscale:
             self.ax.set_xlim(self.fixed_xlim)

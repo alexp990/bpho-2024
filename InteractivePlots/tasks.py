@@ -487,6 +487,7 @@ class Tasks:
             vx0 = v0 * np.cos(np.radians(angle))
             vy0 = v0 * np.sin(np.radians(angle))
             x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
+            v_values = [v0]
             dt = self.dt
 
             while y[-1] >= 0:
@@ -502,7 +503,93 @@ class Tasks:
                 vx.append(vx[-1] + ax * dt)
                 vy.append(vy[-1] + ay * dt)
 
-            return x, y, v, vx, vy, t
+                v_values.append(v)
+
+            return x, y, v_values, vx, vy, t
+
+        def without_air_resistance(self, v0, h, angle):
+            theta = np.deg2rad(angle)
+
+            vx0 = v0 * np.cos(np.radians(angle))
+            vy0 = v0 * np.sin(np.radians(angle))
+            x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
+            v_values = [v0]
+            dt = 1/1000
+
+            while y[-1] >= 0:
+                t.append(t[-1] + dt)
+                v = np.sqrt(vx[-1]**2 + vy[-1]**2)
+
+                ax = 0
+                ay = -self.g
+
+                x.append(x[-1] + vx[-1] * dt + 0.5 * ax * dt**2)
+                y.append(y[-1] + vy[-1] * dt + 0.5 * ay * dt**2)
+
+                vx.append(vx[-1] + ax * dt)
+                vy.append(vy[-1] + ay * dt)
+
+                v_values.append(v)
+
+            return x, y, v_values, vx, vy, t
+
+    """class Task9:
+        def __init__(self, g, dt):
+            self.g = g
+            self.dt = dt
+
+        def k_factor(self, C_d, rho, cs_area, m):
+            return (0.5 * C_d * rho * cs_area) / m
+
+        def with_air_resistance(self, v0, h, C_d, rho, cs_area, m, angle):
+            theta = np.deg2rad(angle)
+            k = self.k_factor(C_d, rho, cs_area, m)
+            vx0 = v0 * np.cos(theta)
+            vy0 = v0 * np.sin(theta)
+            
+            def derivatives(x, y, vx, vy):
+                v = np.sqrt(vx**2 + vy**2)
+                ax = - (vx / v) * k * v**2
+                ay = -self.g - (vy / v) * k * v**2
+                return vx, vy, ax, ay
+            
+            def rk4_step(x, y, vx, vy):
+                k1vx, k1vy, k1ax, k1ay = derivatives(x, y, vx, vy)
+                k1x = vx
+                k1y = vy
+
+                k2vx, k2vy, k2ax, k2ay = derivatives(x + 0.5 * k1x * self.dt, y + 0.5 * k1y * self.dt, vx + 0.5 * k1ax * self.dt, vy + 0.5 * k1ay * self.dt)
+                k2x = vx + 0.5 * k1ax * self.dt
+                k2y = vy + 0.5 * k1ay * self.dt
+
+                k3vx, k3vy, k3ax, k3ay = derivatives(x + 0.5 * k2x * self.dt, y + 0.5 * k2y * self.dt, vx + 0.5 * k2ax * self.dt, vy + 0.5 * k2ay * self.dt)
+                k3x = vx + 0.5 * k2ax * self.dt
+                k3y = vy + 0.5 * k2ay * self.dt
+
+                k4vx, k4vy, k4ax, k4ay = derivatives(x + k3x * self.dt, y + k3y * self.dt, vx + k3ax * self.dt, vy + k3ay * self.dt)
+                k4x = vx + k3ax * self.dt
+                k4y = vy + k3ay * self.dt
+
+                vx_new = vx + (self.dt / 6) * (k1ax + 2 * k2ax + 2 * k3ax + k4ax)
+                vy_new = vy + (self.dt / 6) * (k1ay + 2 * k2ay + 2 * k3ay + k4ay)
+                x_new = x + (self.dt / 6) * (k1x + 2 * k2x + 2 * k3x + k4x)
+                y_new = y + (self.dt / 6) * (k1y + 2 * k2y + 2 * k3y + k4y)
+
+                return x_new, y_new, vx_new, vy_new
+
+            x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
+            v_values = [v0]
+
+            while y[-1] >= 0:
+                x_new, y_new, vx_new, vy_new = rk4_step(x[-1], y[-1], vx[-1], vy[-1])
+                t.append(t[-1] + self.dt)
+                x.append(x_new)
+                y.append(y_new)
+                vx.append(vx_new)
+                vy.append(vy_new)
+                v_values.append(np.sqrt(vx_new**2 + vy_new**2))
+
+            return x, y, v_values, vx, vy, t
 
         def without_air_resistance(self, v0, h, angle):
             theta = np.radians(angle) 
@@ -512,15 +599,11 @@ class Tasks:
             x, y, v, vx, vy, t = [0], [h], [v0], [vx0], [vy0], [0]
 
             while y[-1] >= 0:
-
                 t.append(t[-1] + self.dt)
-
                 x.append(vx[-1] * t[-1])
                 y.append(h + vy[-1] * t[-1] - 0.5 * self.g * t[-1]**2)
-
                 vx.append(vx0)
                 vy.append(vy0 - self.g * t[-1])
-
                 v.append(np.sqrt(vx[-1]**2 + vy[-1]**2))
 
-            return x, y, v, vx, vy, t        
+            return x, y, v, vx, vy, t"""        
