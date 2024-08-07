@@ -1,37 +1,59 @@
-import tkinter as tk
+import numpy as np
+import matplotlib.pyplot as plt
 
-class NumberEntryApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Number Entry Example")
+def projectile_motion(t, y, rho, C_d, A, m, g):
+    x, y, vx, vy = y
+    v = np.sqrt(vx**2 + vy**2)
+    ax = -0.5 * rho * C_d * A * v * vx / m
+    ay = -g - 0.5 * rho * C_d * A * v * vy / m
+    return np.array([vx, vy, ax, ay])
 
-        # Title Label
-        self.title_label = tk.Label(root, text="Enter a number:", font=("Helvetica", 16))
-        self.title_label.pack(pady=10)
+def rk4_step(f, y, t, dt, *args):
+    k1 = dt * f(t, y, *args)
+    k2 = dt * f(t + 0.5 * dt, y + 0.5 * k1, *args)
+    k3 = dt * f(t + 0.5 * dt, y + 0.5 * k2, *args)
+    k4 = dt * f(t + dt, y + k3, *args)
+    return y + (k1 + 2*k2 + 2*k3 + k4) / 6
 
-        # Entry Widget for number input
-        self.number_entry = tk.Entry(root, font=("Helvetica", 14))
-        self.number_entry.pack(pady=5)
+def trajectory_length(u, theta, rho, C_d, A, m, g=9.81, dt=0.01):
+    vx0 = u * np.cos(theta)
+    vy0 = u * np.sin(theta)
+    y0 = np.array([0, 0, vx0, vy0])
+    
+    t = 0
+    trajectory = [y0[:2]]  
+    while y0[1] >= 0: 
+        y0 = rk4_step(projectile_motion, y0, t, dt, rho, C_d, A, m, g)
+        t += dt
+        trajectory.append(y0[:2])
+    
+    trajectory = np.array(trajectory)
 
-        # Bind the Enter key to the submission function
-        self.number_entry.bind("<Return>", self.display_number)
+    dx = np.diff(trajectory[:, 0])
+    dy = np.diff(trajectory[:, 1])
+    ds = np.sqrt(dx**2 + dy**2)
+    length = np.sum(ds)
+    
+    return trajectory, length
 
-        # Button to submit the number
-        self.submit_button = tk.Button(root, text="Submit", font=("Helvetica", 14), command=self.display_number)
-        self.submit_button.pack(pady=10)
+def plot_trajectory(trajectory):
+    plt.figure(figsize=(10, 6))
+    plt.plot(trajectory[:, 0], trajectory[:, 1], label='Trajectory Path')
+    plt.xlabel('Horizontal Distance (m)')
+    plt.ylabel('Vertical Distance (m)')
+    plt.title('Projectile Trajectory with Air Resistance')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
-        # Label to display the entered number
-        self.result_label = tk.Label(root, text="", font=("Helvetica", 16))
-        self.result_label.pack(pady=10)
+u = 50  # initial speed (m/s)
+theta = np.pi / 4  # launch angle (radians)
+rho = 1.225  # air density (kg/m^3)
+C_d = 0.47  # drag coefficient (dimensionless)
+A = 0.01  # cross-sectional area (m^2)
+m = 0.1  # mass of the projectile (kg)
 
-    def display_number(self, event=None):
-        # Retrieve the number from the Entry widget
-        number = self.number_entry.get()
-        
-        # Update the result label to show the entered number
-        self.result_label.config(text=f"Entered number: {number}")
+trajectory, length = trajectory_length(u, theta, rho, C_d, A, m)
+print(f"Trajectory length with air resistance: {length:.2f} meters")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = NumberEntryApp(root)
-    root.mainloop()
+plot_trajectory(trajectory)

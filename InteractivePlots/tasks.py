@@ -469,141 +469,179 @@ class Tasks:
             return t, x, y, vx, vy
     
     #----------------------------Air Resistance and No Air Resistance------------------------
-    
-    class Task9:
 
-        def __init__(self, g, dt):
+    class Task9:
+        def __init__(self, g, dt, rho, C_d, cs_area, m):
             self.g = g
             self.dt = dt
-
+            self.rho = rho
+            self.C_d = C_d
+            self.cs_area = cs_area
+            self.m = m
+    #----------------------------Verlet Method------------------------
         def k_factor(self, C_d, rho, cs_area, m):
             return (0.5 * C_d * rho * cs_area) / m
 
-        def with_air_resistance(self, v0, h, C_d, rho, cs_area, m, angle):
-
+        def verlet_with_air_resistance(self, v0, h, C_d, rho, cs_area, m, angle):
             theta = np.deg2rad(angle)
-
             k = self.k_factor(C_d, rho, cs_area, m)
-            vx0 = v0 * np.cos(np.radians(angle))
-            vy0 = v0 * np.sin(np.radians(angle))
+            vx0 = v0 * np.cos(theta)
+            vy0 = v0 * np.sin(theta)
             x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
             v_values = [v0]
-            dt = self.dt
+            trajectory_length = 0
 
             while y[-1] >= 0:
-                t.append(t[-1] + dt)
+                t.append(t[-1] + self.dt)
                 v = np.sqrt(vx[-1]**2 + vy[-1]**2)
 
                 ax = - (vx[-1] / v) * k * v**2
                 ay = -self.g - (vy[-1] / v) * k * v**2
 
-                x.append(x[-1] + vx[-1] * dt + 0.5 * ax * dt**2)
-                y.append(y[-1] + vy[-1] * dt + 0.5 * ay * dt**2)
+                new_x = x[-1] + vx[-1] * self.dt + 0.5 * ax * self.dt**2
+                new_y = y[-1] + vy[-1] * self.dt + 0.5 * ay * self.dt**2
 
-                vx.append(vx[-1] + ax * dt)
-                vy.append(vy[-1] + ay * dt)
+                # Calculate the distance traveled in this step
+                if len(x) > 1:  # Ensure there is a previous point to compare with
+                    segment_length = np.sqrt((new_x - x[-1])**2 + (new_y - y[-1])**2)
+                    trajectory_length += segment_length
+
+                x.append(new_x)
+                y.append(new_y)
+
+                # Update velocities
+                vx.append(vx[-1] + ax * self.dt)
+                vy.append(vy[-1] + ay * self.dt)
 
                 v_values.append(v)
 
-            return x, y, v_values, vx, vy, t
+            return trajectory_length, x, y, v_values, vx, vy, t
 
-        def without_air_resistance(self, v0, h, angle):
+        def verlet_without_air_resistance(self, v0, h, angle):
             theta = np.deg2rad(angle)
-
-            vx0 = v0 * np.cos(np.radians(angle))
-            vy0 = v0 * np.sin(np.radians(angle))
+            k = 0
+            vx0 = v0 * np.cos(theta)
+            vy0 = v0 * np.sin(theta)
             x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
             v_values = [v0]
-            dt = 1/1000
+            trajectory_length = 0
 
             while y[-1] >= 0:
-                t.append(t[-1] + dt)
+                t.append(t[-1] + self.dt)
                 v = np.sqrt(vx[-1]**2 + vy[-1]**2)
 
                 ax = 0
                 ay = -self.g
 
-                x.append(x[-1] + vx[-1] * dt + 0.5 * ax * dt**2)
-                y.append(y[-1] + vy[-1] * dt + 0.5 * ay * dt**2)
+                # Calculate new positions
+                new_x = x[-1] + vx[-1] * self.dt + 0.5 * ax * self.dt**2
+                new_y = y[-1] + vy[-1] * self.dt + 0.5 * ay * self.dt**2
 
-                vx.append(vx[-1] + ax * dt)
-                vy.append(vy[-1] + ay * dt)
+                # Calculate the distance traveled in this step
+                if len(x) > 1:  # Ensure there is a previous point to compare with
+                    segment_length = np.sqrt((new_x - x[-1])**2 + (new_y - y[-1])**2)
+                    trajectory_length += segment_length
+
+                x.append(new_x)
+                y.append(new_y)
+
+                # Update velocities
+                vx.append(vx[-1] + ax * self.dt)
+                vy.append(vy[-1] + ay * self.dt)
 
                 v_values.append(v)
 
-            return x, y, v_values, vx, vy, t
+            return trajectory_length, x, y, v_values, vx, vy, t
+        
+    #----------------------------Runge-Kutta 4th Order------------------------
 
-    """class Task9:
-        def __init__(self, g, dt):
-            self.g = g
-            self.dt = dt
+        def rk4_step(self, f, y, t, dt):
+            k1 = dt * f(t, y)
+            k2 = dt * f(t + 0.5 * dt, y + 0.5 * k1)
+            k3 = dt * f(t + 0.5 * dt, y + 0.5 * k2)
+            k4 = dt * f(t + dt, y + k3)
+            return y + (k1 + 2*k2 + 2*k3 + k4) / 6
 
-        def k_factor(self, C_d, rho, cs_area, m):
-            return (0.5 * C_d * rho * cs_area) / m
+        def projectile_motion_air_resistance(self, t, y):
+            x, y, vx, vy = y
+            v = np.sqrt(vx**2 + vy**2)
+            ax = -0.5 * self.rho * self.C_d * self.cs_area * v * vx / self.m
+            ay = -self.g - 0.5 * self.rho * self.C_d * self.cs_area * v * vy / self.m
+            return np.array([vx, vy, ax, ay])
 
-        def with_air_resistance(self, v0, h, C_d, rho, cs_area, m, angle):
+        def trajectory_with_air_resistance(self, u, angle, h, dt=0.01):
             theta = np.deg2rad(angle)
-            k = self.k_factor(C_d, rho, cs_area, m)
-            vx0 = v0 * np.cos(theta)
-            vy0 = v0 * np.sin(theta)
+            vx0 = u * np.cos(theta)
+            vy0 = u * np.sin(theta)
+            y0 = np.array([0, h, vx0, vy0])
             
-            def derivatives(x, y, vx, vy):
-                v = np.sqrt(vx**2 + vy**2)
-                ax = - (vx / v) * k * v**2
-                ay = -self.g - (vy / v) * k * v**2
-                return vx, vy, ax, ay
+            t = 0
+            trajectory = [y0[:2]]
+            velocities = [np.sqrt(vx0**2 + vy0**2)]
+            vx_values = [vx0]
+            vy_values = [vy0]
+            times = [t]
             
-            def rk4_step(x, y, vx, vy):
-                k1vx, k1vy, k1ax, k1ay = derivatives(x, y, vx, vy)
-                k1x = vx
-                k1y = vy
-
-                k2vx, k2vy, k2ax, k2ay = derivatives(x + 0.5 * k1x * self.dt, y + 0.5 * k1y * self.dt, vx + 0.5 * k1ax * self.dt, vy + 0.5 * k1ay * self.dt)
-                k2x = vx + 0.5 * k1ax * self.dt
-                k2y = vy + 0.5 * k1ay * self.dt
-
-                k3vx, k3vy, k3ax, k3ay = derivatives(x + 0.5 * k2x * self.dt, y + 0.5 * k2y * self.dt, vx + 0.5 * k2ax * self.dt, vy + 0.5 * k2ay * self.dt)
-                k3x = vx + 0.5 * k2ax * self.dt
-                k3y = vy + 0.5 * k2ay * self.dt
-
-                k4vx, k4vy, k4ax, k4ay = derivatives(x + k3x * self.dt, y + k3y * self.dt, vx + k3ax * self.dt, vy + k3ay * self.dt)
-                k4x = vx + k3ax * self.dt
-                k4y = vy + k3ay * self.dt
-
-                vx_new = vx + (self.dt / 6) * (k1ax + 2 * k2ax + 2 * k3ax + k4ax)
-                vy_new = vy + (self.dt / 6) * (k1ay + 2 * k2ay + 2 * k3ay + k4ay)
-                x_new = x + (self.dt / 6) * (k1x + 2 * k2x + 2 * k3x + k4x)
-                y_new = y + (self.dt / 6) * (k1y + 2 * k2y + 2 * k3y + k4y)
-
-                return x_new, y_new, vx_new, vy_new
-
-            x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
-            v_values = [v0]
-
-            while y[-1] >= 0:
-                x_new, y_new, vx_new, vy_new = rk4_step(x[-1], y[-1], vx[-1], vy[-1])
-                t.append(t[-1] + self.dt)
-                x.append(x_new)
-                y.append(y_new)
-                vx.append(vx_new)
-                vy.append(vy_new)
-                v_values.append(np.sqrt(vx_new**2 + vy_new**2))
-
-            return x, y, v_values, vx, vy, t
-
-        def without_air_resistance(self, v0, h, angle):
-            theta = np.radians(angle) 
-            vx0 = v0 * np.cos(theta)
-            vy0 = v0 * np.sin(theta)
+            while y0[1] >= 0:
+                y0 = self.rk4_step(self.projectile_motion_air_resistance, y0, t, dt)
+                t += dt
+                trajectory.append(y0[:2])
+                velocities.append(np.sqrt(y0[2]**2 + y0[3]**2))
+                vx_values.append(y0[2])
+                vy_values.append(y0[3])
+                times.append(t)
             
-            x, y, v, vx, vy, t = [0], [h], [v0], [vx0], [vy0], [0]
+            trajectory = np.array(trajectory)
+            velocities = np.array(velocities)
+            vx_values = np.array(vx_values)
+            vy_values = np.array(vy_values)
+            times = np.array(times)
 
-            while y[-1] >= 0:
-                t.append(t[-1] + self.dt)
-                x.append(vx[-1] * t[-1])
-                y.append(h + vy[-1] * t[-1] - 0.5 * self.g * t[-1]**2)
-                vx.append(vx0)
-                vy.append(vy0 - self.g * t[-1])
-                v.append(np.sqrt(vx[-1]**2 + vy[-1]**2))
+            dx = np.diff(trajectory[:, 0])
+            dy = np.diff(trajectory[:, 1])
+            ds = np.sqrt(dx**2 + dy**2)
+            length = np.sum(ds)
+            
+            return trajectory[:, 0], trajectory[:, 1], velocities, vx_values, vy_values, times, length
+        
+        def projectile_motion_without_air_resistance(self, t, y):
+            x, y, vx, vy = y
+            v = np.sqrt(vx**2 + vy**2)
+            ax = 0
+            ay = -self.g 
+            return np.array([vx, vy, ax, ay])
 
-            return x, y, v, vx, vy, t"""        
+        def trajectory_without_air_resistance(self, u, angle, h, dt=0.01):
+            theta = np.deg2rad(angle)
+            vx0 = u * np.cos(theta)
+            vy0 = u * np.sin(theta)
+            y0 = np.array([0, h, vx0, vy0])
+            
+            t = 0
+            trajectory = [y0[:2]]
+            velocities = [np.sqrt(vx0**2 + vy0**2)]
+            vx_values = [vx0]
+            vy_values = [vy0]
+            times = [t]
+            
+            while y0[1] >= 0:
+                y0 = self.rk4_step(self.projectile_motion_without_air_resistance, y0, t, dt)
+                t += dt
+                trajectory.append(y0[:2])
+                velocities.append(np.sqrt(y0[2]**2 + y0[3]**2))
+                vx_values.append(y0[2])
+                vy_values.append(y0[3])
+                times.append(t)
+            
+            trajectory = np.array(trajectory)
+            velocities = np.array(velocities)
+            vx_values = np.array(vx_values)
+            vy_values = np.array(vy_values)
+            times = np.array(times)
+
+            dx = np.diff(trajectory[:, 0])
+            dy = np.diff(trajectory[:, 1])
+            ds = np.sqrt(dx**2 + dy**2)
+            length = np.sum(ds)
+            
+            return trajectory[:, 0], trajectory[:, 1], velocities, vx_values, vy_values, times, length

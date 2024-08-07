@@ -7,9 +7,11 @@ import sys
 from tkinter import font
 from tasks import Tasks
 from matplotlib.animation import FuncAnimation
+from PIL import Image
+import io
+from tkinter import filedialog
 
 tasks = Tasks()
-
 
 class PlotApp:
     def __init__(self, root):
@@ -19,9 +21,11 @@ class PlotApp:
         self.current_plot_type = 'Exact Model'
         self.current_plot_subtype = ''
 
-        #root.state('zoomed') 
-        #self.root.attributes('-fullscreen', True)
+        root.state('zoomed') 
+        self.root.attributes('-fullscreen', True)
         self.root.bind("<Escape>", self.exit_app)  
+
+        self.img = tk.PhotoImage(file=r"C:\Users\Alex\Documents\GitHub\bpho-projectile-motion\InteractivePlots\image.png")
 
         self.start_x = None
         self.start_y = None
@@ -41,8 +45,7 @@ class PlotApp:
         self.drag_start_x = None
         self.drag_start_y = None
 
-        self.autoscale = True
-        
+        self.autoscale = True        
 
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
@@ -59,6 +62,9 @@ class PlotApp:
         self.information_frame = tk.Frame(self.root, borderwidth=2, relief="solid", background="lightgrey")
         self.utils_frame = tk.Frame(self.root, borderwidth=2, relief="solid")
         self.toggle_fixed_axes_button_frame = tk.Frame(self.root, borderwidth=2, relief="solid")
+
+        self.image = tk.Label(self.utils_frame, image=self.img)
+        self.image.pack(expand=True)
 
         self.data_frame_above_sliders.grid(row=0, column=1, sticky="nsew")
         self.top_left_frame.grid(row=1, column=0, sticky="nsew")  
@@ -92,67 +98,56 @@ class PlotApp:
 
 
         self.g_label_frame = tk.Frame(self.information_frame, height=2, width=20)
-        self.info_box2 = tk.Label(self.information_frame, height=5, width=20, compound='c')
-        self.info_box3 = tk.Label(self.information_frame, height=5, width=20, compound='c')
-        self.info_box4 = tk.Label(self.information_frame, height=5, width=20, compound='c')
-        self.info_box5 = tk.Label(self.information_frame, height=5, width=20, compound='c')
-        self.info_box6 = tk.Label(self.information_frame, height=5, width=20, compound='c')
+        self.info_box2 = tk.Frame(self.information_frame, height=5, width=20)
+        self.info_box3 = tk.Frame(self.information_frame, height=5, width=20)
+        self.info_box4 = tk.Frame(self.information_frame, height=5, width=20)
+        self.info_box5 = tk.Frame(self.information_frame, height=5, width=20)
+        self.info_box6 = tk.Frame(self.information_frame, height=5, width=20)
 
-        self.g_label_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-        self.info_box2.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
-        self.info_box3.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
-        self.info_box4.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
-        self.info_box5.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
-        self.info_box6.grid(row=1, column=2, padx=10, pady=10, sticky="nsew")
+        self.g_label_frame.grid(row=0, column=0, padx=10, pady=10)
+        self.info_box2.grid(row=0, column=1, padx=10, pady=10)
+        self.info_box3.grid(row=0, column=2, padx=10, pady=10)
+        self.info_box4.grid(row=1, column=0, padx=10, pady=10)
+        self.info_box5.grid(row=1, column=1, padx=10, pady=10)
+        self.info_box6.grid(row=1, column=2, padx=10, pady=10)
 
+        self.g_label_frame.config(height=330, width=650)
+        self.info_box2.config(height=330, width=650)
+        self.info_box3.config(height=330, width=650)
+        self.info_box4.config(height=330, width=650)
+        self.info_box5.config(height=330, width=650)
+        self.info_box6.config(height=330, width=650)
 
-        """self.n_of_bounces_label = tk.Label(self.info_box2, height=1, width=2, compound='c', text="N:", font=("Helvetica", 20))
-        self.n_of_bounces_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        self.n_of_bounces_label_input = tk.Label(self.info_box2, height=1, width=2, compound='c', text=self.N, font=("Helvetica", 20))
-        self.n_of_bounces_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.n_of_bounces_label_input.bind("<Button-1>", self.switch_to_text_n_bounces)"""
+        self.g_label_frame.grid_propagate(False)
+        self.info_box2.grid_propagate(False)
+        self.info_box3.grid_propagate(False)
+        self.info_box4.grid_propagate(False)
+        self.info_box5.grid_propagate(False)
+        self.info_box6.grid_propagate(False)
 
-        self.info_box2.grid_columnconfigure(0, weight=1)
-        self.info_box2.grid_columnconfigure(1, weight=1)
-        self.info_box2.grid_rowconfigure(0, weight=1)
+        self.info_box2.grid_columnconfigure(0, weight=0)
+        self.info_box2.grid_columnconfigure(1, weight=0)
+        self.info_box2.grid_rowconfigure(0, weight=0)
 
-        """self.c_label = tk.Label(self.info_box3, height=1, width=1, compound='c', text="C:", font=("Helvetica", 20))
-        self.c_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        self.c_label_input = tk.Label(self.info_box3, height=1, width=1, compound='c', text=self.C, font=("Helvetica", 20))
-        self.c_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.c_label_input.bind("<Button-1>", self.switch_to_text_c)"""
+        self.info_box3.grid_columnconfigure(0, weight=0)
+        self.info_box3.grid_columnconfigure(1, weight=0)
+        self.info_box3.grid_rowconfigure(0, weight=0)
 
-        self.info_box3.grid_columnconfigure(0, weight=1)
-        self.info_box3.grid_columnconfigure(1, weight=1)
-        self.info_box3.grid_rowconfigure(0, weight=1)
-
-        self.g_label_frame.grid_columnconfigure(0, weight=1)
-        self.g_label_frame.grid_columnconfigure(1, weight=1)
-        self.g_label_frame.grid_rowconfigure(0, weight=1)    
-
-        """self.g_label = tk.Label(self.g_label_frame, height=1, width=1, compound='c', text="g:", font=("Helvetica", 20))
-        self.g_label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
-        self.g_label_input = tk.Label(self.g_label_frame, height=1, width=1, compound='c', text=self.g, font=("Helvetica", 20))
-        self.g_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.g_label_input.bind("<Button-1>", self.switch_to_text_g)"""
-
-        """self.n_of_bounces_label = EditableLabel(self.info_box2, text=f"N: {self.N}", font=("Helvetica", 30))
-        self.n_of_bounces_label.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-
-        self.c_label = EditableLabel(self.info_box3, text=f"C: {self.C}", font=("Helvetica", 30))
-        self.c_label.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-
-        self.g_label = EditableLabel(self.g_label_frame, text=f"g (m/s^2): {self.g}", font=("Helvetica", 30))
-        self.g_label.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")   """
+        self.g_label_frame.grid_columnconfigure(0, weight=0)
+        self.g_label_frame.grid_columnconfigure(1, weight=0)
+        self.g_label_frame.grid_rowconfigure(0, weight=0)    
 
 
         # Initialize DoubleVar instances with default values
         self.g = tk.DoubleVar(value=9.8)  # Example default value
-        self.N = tk.DoubleVar(value=5)    # Example default value
+        self.N = tk.IntVar(value=5)    # Example default value
         self.C = tk.DoubleVar(value=0.8)
+        self.Cd = tk.DoubleVar(value=0.1)
+        self.rho = tk.DoubleVar(value=1)
+        self.cs_area = tk.DoubleVar(value=0.005)
 
         # Create multiple NumberEntryWidget instances
-        self.create_number_entry_widget(
+        self.g_widget = self.create_number_entry_widget(
             self.g_label_frame, 
             "Enter g:", 
             "g = ", 
@@ -160,23 +155,63 @@ class PlotApp:
             self.g.get()
         )
 
-        self.create_number_entry_widget(
+        self.C_widget_visible = False
+
+        self.c_widget = self.create_number_entry_widget(
             self.info_box3, 
-            "Enter C (coefficient of restitution):", 
+            "Enter C \n(coefficient of restitution):", 
             "C = ", 
             self.C,
             self.C.get()
         )
 
-        self.create_number_entry_widget(
+        self.show_hide_frame(self.c_widget, self.C_widget_visible)
+
+        self.N_widget_visible = False
+
+        self.n_widget = self.create_number_entry_widget(
             self.info_box2, 
-            "Enter N (number of bounces simulated):", 
+            "Enter N \n(number of bounces):", 
             "N = ", 
             self.N,
             self.N.get()
         )
 
+        self.show_hide_frame(self.n_widget, self.N_widget_visible)
 
+        self.Cd_widget_visible = False
+
+        self.Cd_widget = self.create_number_entry_widget(
+            self.info_box5, 
+            "Enter Cd \n(drag coefficient):", 
+            "Cd = ", 
+            self.Cd,
+            self.Cd.get()
+        )
+
+        self.rho_widget_visible = False
+
+        self.rho_widget = self.create_number_entry_widget(
+            self.info_box6, 
+            "Enter rho \n(air density):", 
+            "Cd = ", 
+            self.rho,
+            self.rho.get()
+        )
+
+        self.show_hide_frame(self.rho_widget, self.rho_widget_visible)
+
+        self.cs_area_widget_visible = False
+
+        self.cs_area_widget = self.create_number_entry_widget(
+            self.info_box2, 
+            "Enter CS area \n(cross sectional area):", 
+            "CS area = ", 
+            self.cs_area,
+            self.cs_area.get()
+        )
+
+        self.show_hide_frame(self.rho_widget, self.rho_widget_visible)
 
         self.info_box4.grid_columnconfigure(0, weight=1)
         self.info_box4.grid_rowconfigure(0, weight=1)
@@ -184,6 +219,40 @@ class PlotApp:
         self.toggle_range_button.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
 
         self.distance_travelled_by_projectile_var = True
+
+        self.options = ["Verlet", "RK4"]
+        self.menu_font = font.Font(size=30)
+        self.button_font = font.Font(size=35)
+
+        self.integrator_button_visible = False
+
+        self.selected_integration_method = tk.StringVar()
+        self.selected_integration_method.set(self.options[0])
+
+        self.info_box3.grid_columnconfigure(0, weight=1)
+        self.info_box3.grid_rowconfigure(0, weight=1)
+        self.toggle_integration_method = tk.Menubutton(
+            self.info_box3, 
+            text=f"{self.options[0]}",
+            font=self.button_font,
+            width=20
+        )
+        self.toggle_integration_method.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
+        self.toggle_integration_method.bind("<<ComboboxSelected>>", self.on_selection_integrator)
+
+        self.integrator_button_visible == False
+
+        self.menu = tk.Menu(self.toggle_integration_method, tearoff=0)
+        for option in self.options:
+            self.menu.add_command(
+                label=option, 
+                command=lambda opt=option: self.on_selection_integrator(opt),
+                font=self.menu_font
+            )
+
+        self.toggle_integration_method['menu'] = self.menu
+
+        self.distance_travelled_by_projectile_var = True        
 
         self.info_box5.grid_columnconfigure(0, weight=1)
         self.info_box5.grid_rowconfigure(0, weight=1)
@@ -223,7 +292,7 @@ class PlotApp:
         self.toggle_fixed_axes_button.grid(row=0, column=0, padx=5, pady=5)
         self.toggle_fixed_axes_button.select()
 
-        self.take_image_button = tk.Button(self.toggle_fixed_axes_button_frame, text="Take Image", command=self.toggle_autoscale, font=("Helvetica", 24), height=2, width=30)
+        self.take_image_button = tk.Button(self.toggle_fixed_axes_button_frame, text="Take Image", command=self.save_plot_as_image, font=("Helvetica", 24), height=2, width=30)
         self.take_image_button.grid(row=1, column=0, padx=5, pady=5)
 
 
@@ -234,16 +303,46 @@ class PlotApp:
 
         self.update_plot()
 
+    def save_plot_as_image(self):
+        # Prompt the user to select a file path
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
+            title="Save the Plot"
+        )
+        
+        if file_path:  
+
+            buf = io.BytesIO()
+            self.fig.savefig(buf, format='png')
+            buf.seek(0)
+
+            # Save the BytesIO object to the chosen file path
+            with open(file_path, 'wb') as f:
+                f.write(buf.getvalue())
+
+            buf.close()
+
+        buf.close()
+
+    def on_selection_integrator(self, option):
+        self.selected_integration_method.set(option)
+        self.toggle_integration_method.config(text=f"{option}")
+        self.update_plot()
+
     def create_number_entry_widget(self, frame, title_text, result_text, variable_to_update, initial_value):
+        
 
-        title_label = tk.Label(frame, text=title_text, font=("Helvetica", 25))
-        title_label.pack(pady=10)
+        title_label = tk.Label(frame, text=title_text, font=("Helvetica", 34))
+        title_label.pack(pady=10, padx=10)
 
-        number_entry = tk.Entry(frame, font=("Helvetica", 22), textvariable=variable_to_update)
-        number_entry.pack(pady=5)
+        number_entry = tk.Entry(frame, font=("Helvetica", 30), textvariable=variable_to_update)
+        number_entry.pack(pady=10, padx=10)
 
-        result_label = tk.Label(frame, text=f"{result_text} {initial_value}", font=("Helvetica", 24), height=1)
-        result_label.pack(pady=5)
+        result_label = tk.Label(frame, text=f"{result_text} {initial_value}", font=("Helvetica", 32))
+        result_label.pack(pady=10, padx=10)
+
+        frame.pack_propagate(False)
 
         def display_number(event=None):
 
@@ -255,7 +354,21 @@ class PlotApp:
 
         number_entry.bind("<Return>", display_number)
         
-        return frame
+        return (title_label, number_entry, result_label)
+    
+    def show_hide_frame(self, widgets, show):
+        # Show or hide the widgets based on the boolean 'show'
+        for widget in widgets:
+            if show:
+                widget.pack_propagate(False)
+                widget.pack(pady=10, padx=10) 
+            else:
+                widget.pack_forget() 
+
+
+    def toggle_visibility(self):
+        # Example method to toggle visibility
+        self.show_hide_frame(self.frame2, True)
 
     def toggle_animation(self):
         self.toggle_animation_var = not self.toggle_animation_var
@@ -273,63 +386,6 @@ class PlotApp:
             d_flown =tasks.trajectory_length(u_vals[i], theta_vals[i], range_vals[i], g)
             distances_flown.append(d_flown)
         return distances_flown
-
-    """def switch_to_text_n_bounces(self, event):
-        text = self.n_of_bounces_label_input.cget("text")
-        self.n_of_bounces_label_input.grid_forget()
-        self.text_n_bounces = tk.Text(self.info_box2, font=('Helvetica', 10), height=1, width=1)
-        self.text_n_bounces.insert(tk.END, text)
-        self.text_n_bounces.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.text_n_bounces.focus()
-        self.text_n_bounces.bind("<Return>", self.save_input_n_bounces)
-
-    def switch_to_text_c(self, event):
-        text = self.c_label_input.cget("text")
-        self.c_label_input.grid_forget()
-        self.text_c = tk.Text(self.info_box3, font=('Helvetica', 10), height=1, width=1)
-        self.text_c.insert(tk.END, text)
-        self.text_c.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.text_c.focus()
-        self.text_c.bind("<Return>", self.save_input_c)
-
-    def switch_to_text_g(self, event):
-        text = self.g_label_input.cget("text")
-        self.g_label_input.grid_forget()
-        self.text_g = tk.Text(self.g_label_frame, font=('Helvetica', 10), height=1, width=1)
-        self.text_g.insert(tk.END, text)
-        self.text_g.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.text_g.focus()
-        self.text_g.bind("<Return>", self.save_input_g)
-
-    def save_input_n_bounces(self, event):
-        input_text = self.text_n_bounces.get("1.0", tk.END).strip()
-        self.text_n_bounces.grid_forget()
-        self.n_of_bounces_label_input = tk.Label(self.info_box2, text=f"{int(input_text)}", font=('Helvetica', 20))
-        self.n_of_bounces_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.n_of_bounces_label_input.bind("<Button-1>", self.switch_to_text_n_bounces)
-        self.N = int(input_text)
-        self.update_plot()
-
-    def save_input_c(self, event):
-        input_text = float(self.text_c.get("1.0", tk.END).strip())
-        if input_text > 1:
-            input_text = self.C
-        self.text_c.grid_forget()
-        self.c_label_input = tk.Label(self.info_box3, text=f"{input_text}", font=('Helvetica', 20))
-        self.c_label_input.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
-        self.c_label_input.bind("<Button-1>", self.switch_to_text_c)
-        self.C = input_text
-        self.update_plot()
-
-    def save_input_g(self, event):
-        input_text = self.text_g.get("1.0", tk.END).strip()
-        self.text_g.grid_forget()
-        self.g_label_input = tk.Label(self.g_label_frame, text=f"{input_text}", font=('Helvetica', 20))
-        self.g_label_input.grid(row=0, column=1, padx=5, pady=5)
-        self.g_label_input.bind("<Button-1>", self.switch_to_text_g)
-        self.g = float(input_text)
-        self.update_plot()"""
-
 
     def track_mouse_position(self, event):
 
@@ -560,9 +616,28 @@ class PlotApp:
             self.current_plot_subtype = ''
 
         if self.current_plot_type != 'Ball Bounces Model':
-
             self.animation_button_visible = False
 
+        if self.current_plot_type != 'Air Resistance Model':
+            self.integrator_button_visible = False
+        else:
+            self.integrator_button_visible = True
+
+        if self.current_plot_type != 'Ball Bounces Model':
+            self.N_widget_visible = False
+            self.C_widget_visible = False
+        else:
+            self.N_widget_visible = True
+            self.C_widget_visible = True
+
+        if self.current_plot_type != 'Air Resistance Model':
+            self.Cd_widget_visible = False
+            self.rho_widget_visible = False
+            self.cs_area_widget_visible = False
+        else:
+            self.Cd_widget_visible = True
+            self.rho_widget_visible = True
+            self.cs_area_widget_visible = True
 
         self.reset_textboxes()
 
@@ -602,12 +677,20 @@ class PlotApp:
 
     def update_plot(self):
         self.ax.clear()
-        
-        #print(self.current_plot_type)
-        #print(self.animation_button_visible)
 
         if self.animation_button_visible == False:
             self.toggle_animation_button.grid_forget()
+
+        if self.integrator_button_visible == False:
+            self.toggle_integration_method.grid_forget()
+        else:
+            self.toggle_integration_method.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
+
+        self.show_hide_frame(self.n_widget, self.N_widget_visible)
+        self.show_hide_frame(self.c_widget, self.C_widget_visible)
+        self.show_hide_frame(self.Cd_widget, self.Cd_widget_visible)
+        self.show_hide_frame(self.rho_widget, self.rho_widget_visible)
+        self.show_hide_frame(self.cs_area_widget, self.cs_area_widget_visible)
 
 
         h = self.h_slider.get()
@@ -701,10 +784,10 @@ class PlotApp:
             self.ax.set_xlabel('X Displacement', fontsize=22)
             self.ax.set_ylabel('Y Displacement', fontsize=22)
 
-            self.text_box1.config(text=f'Theta (minimum u):\n {round(theta_deg_min_u, 2)} deg', font=("Arial", 30), height=1, width=15)
-            self.text_box2.config(text=f'Theta (high ball):\n {round(theta_deg_user_u_high, 2)} deg\nTheta (low ball):\n {round(theta_deg_user_u_low, 2)} deg', font=("Arial", 30), height=1, width=15)
-            self.text_box3.config(text=f'Theta (maximum range):\n {round(theta_deg_max_range, 2)} deg', font=("Arial", 30), height=1, width=15)
-            self.text_box4.config(text=f'Minimum u:\n {round(u_min, 2)} m/s', font=("Arial", 30), height=1, width=15)
+            self.text_box1.config(text=f'Theta (minimum u):\n {round(theta_deg_min_u, 2)} deg', font=("Arial", 34), height=1, width=15)
+            self.text_box2.config(text=f'Theta (high ball):\n {round(theta_deg_user_u_high, 2)} deg\nTheta (low ball):\n {round(theta_deg_user_u_low, 2)} deg', font=("Arial", 18), height=1, width=15)
+            self.text_box3.config(text=f'Theta (maximum range):\n {round(theta_deg_max_range, 2)} deg', font=("Arial", 34), height=1, width=15)
+            self.text_box4.config(text=f'Minimum u:\n {round(u_min, 2)} m/s', font=("Arial", 34), height=1, width=15)
 
             if self.distance_travelled_by_projectile_var == True:
 
@@ -749,10 +832,10 @@ class PlotApp:
                 
                 labels_font = font.Font(size=22)
                 
-                self.text_box1.config(text=f'Range (user input):\n{round(range_, 2)} meters\nRange (maximum range):\n{round(range_max, 2)} meters', font=("Arial", 24), height=1, width=15)
-                self.text_box2.config(text=f'TOF (user input):\n{round(tof, 2)} seconds\nTOF (maximum range):\n{round(tof_max_r, 2)} seconds', font=("Arial", 24), height=1, width=15)
-                self.text_box3.config(text=f'Theta (user):\n{round(theta, 2)} deg', font=("Arial", 30), height=1, width=15)
-                self.text_box4.config(text=f'Theta (max range):\n{round(theta_max_r, 2)} deg', font=("Arial", 30), height=1, width=15)
+                self.text_box1.config(text=f'Range (user input):\n{round(range_, 2)} meters\nRange (maximum range):\n{round(range_max, 2)} meters', font=("Arial", 20), height=1, width=15)
+                self.text_box2.config(text=f'TOF (user input):\n{round(tof, 2)} seconds\nTOF (maximum range):\n{round(tof_max_r, 2)} seconds', font=("Arial", 20), height=1, width=15)
+                self.text_box3.config(text=f'Theta (user):\n{round(theta, 2)} deg', font=("Arial", 24), height=1, width=15)
+                self.text_box4.config(text=f'Theta (max range):\n{round(theta_max_r, 2)} deg', font=("Arial", 24), height=1, width=15)
 
 
                 self.ax.set_title('y displacement vs x displacement', fontsize=28)
@@ -902,11 +985,9 @@ class PlotApp:
             if self.animation_button_visible == True:
                 self.toggle_animation_button.grid(row = 0, column=0, padx=5, pady=5, stick='nsew')
 
-            print("animation button visible")
-
-            N = self.N.get()     # Maximum number of bounces
-            C = self.C.get()   # Coefficient of restitution
-            dt = 1/25  # Time step (s)
+            N = self.N.get() - 1   
+            C = self.C.get()  
+            dt = 1/25  
 
             t, x, y, vx, vy = tasks.task8(h, u, theta, dt, g, N, C)
 
@@ -917,6 +998,8 @@ class PlotApp:
             self.ax.set_ylabel('Height (m)')
             self.ax.set_title('Projectile Trajectory Animation with Bounces (Verlet Method)')
 
+            self.text_box1.config(text=f'Range:\n{round(x[-1], 2)} meters', font=("Arial", 37), height=1, width=15)
+            self.text_box2.config(text=f'TOF:\n{round(t[-1], 2)} seconds', font=("Arial", 37), height=1, width=15)
 
             if self.toggle_animation_var == True:
                 line, = self.ax.plot([], [], '.', lw=0.1)
@@ -933,18 +1016,61 @@ class PlotApp:
 
         elif self.current_plot_type == 'Air Resistance Model':
 
-            task9 = Tasks.Task9(g, dt)
-
-            C_d = 0.1  # Drag coefficient
-            rho = 1  # Air density (kg/m^3)
-            cs_area = 0.007  # Cross-sectional area (m^2)
+            C_d = self.Cd.get()  # Drag coefficient
+            rho = self.rho.get()  # Air density (kg/m^3)
+            cs_area = self.cs_area.get()  # Cross-sectional area (m^2)
             dt = 0.01 
             v0 = u  
             m = mass
             angle = theta
+           
+            task9 = Tasks.Task9(g, dt, rho, C_d, cs_area, m)
 
-            xnr, ynr, vnr, vxnr, vynr, tnr  = task9.without_air_resistance(v0, h, angle)
-            xr, yr, vr, vxr, vyr, tr = task9.with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)
+            if self.selected_integration_method.get() == "Verlet":
+                dnr, xnr, ynr, vnr, vxnr, vynr, tnr  = task9.verlet_without_air_resistance(v0, h, angle)
+                dr, xr, yr, vr, vxr, vyr, tr = task9.verlet_with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)
+
+                if self.distance_travelled_by_projectile_var == True:
+
+                    self.d_travelled_by_projectile_text1 = self.ax.text(0.03, 0.05, rf'Distance travelled by projectile with no air resistance (Verlet) $\approx$ {round(dnr, 2)} m', fontsize=24, color='blue',
+                        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.7),transform=self.ax.transAxes)
+                    self.d_travelled_by_projectile_text2 = self.ax.text(0.03, 0.15, rf'Distance travelled by projectile with air resistance (Verlet) $\approx$ {round(dr, 2)} m', fontsize=24, color='red',
+                        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.7),transform=self.ax.transAxes)     
+                else:
+                    if hasattr(self, 'd_travelled_by_projectile_text1'):
+                        self.d_travelled_by_projectile_text1.remove()
+                        delattr(self, 'd_travelled_by_projectile_text1')   
+                    if hasattr(self, 'd_travelled_by_projectile_text2'):
+                        self.d_travelled_by_projectile_text2.remove()
+                        delattr(self, 'd_travelled_by_projectile_text2')   
+
+                self.text_box1.config(text=f'Range (no air resistance):\n{round(xnr[-1], 2)} meters\n(Verlet)', font=("Arial", 30), height=1, width=15)
+                self.text_box2.config(text=f'TOF (no air resistance):\n{round(tnr[-1], 2)} seconds\n(Verlet)', font=("Arial", 30), height=1, width=15)
+                self.text_box3.config(text=f'Range (air resistance):\n{round(xr[-1], 2)} meters\n(Verlet)', font=("Arial", 30), height=1, width=15)
+                self.text_box4.config(text=f'TOF (air resistance):\n{round(tr[-1], 2)} seconds\n(Verlet)', font=("Arial", 30), height=1, width=15)
+
+            if self.selected_integration_method.get() == "RK4":
+                xnr, ynr, vnr, vxnr, vynr, tnr, dnr  = task9.trajectory_without_air_resistance(u, angle, h)
+                xr, yr, vr, vxr, vyr, tr, dr = task9.trajectory_with_air_resistance(u, angle, h)
+
+                if self.distance_travelled_by_projectile_var == True:
+
+                    self.d_travelled_by_projectile_text1 = self.ax.text(0.03, 0.05, rf'Distance travelled by projectile with no air resistance (RK4) $\approx$ {round(dnr, 2)} m', fontsize=24, color='blue',
+                        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.7),transform=self.ax.transAxes)
+                    self.d_travelled_by_projectile_text2 = self.ax.text(0.03, 0.15, rf'Distance travelled by projectile with air resistance (RK4) $\approx$ {round(dr, 2)} m', fontsize=24, color='red',
+                        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.7),transform=self.ax.transAxes)     
+                else:
+                    if hasattr(self, 'd_travelled_by_projectile_text1'):
+                        self.d_travelled_by_projectile_text1.remove()
+                        delattr(self, 'd_travelled_by_projectile_text1')   
+                    if hasattr(self, 'd_travelled_by_projectile_text2'):
+                        self.d_travelled_by_projectile_text2.remove()
+                        delattr(self, 'd_travelled_by_projectile_text2')   
+
+                self.text_box1.config(text=f'Range (no air resistance):\n{round(xnr[-1], 2)} meters\n(RK4)', font=("Arial", 30), height=1, width=15)
+                self.text_box2.config(text=f'TOF (no air resistance):\n{round(tnr[-1], 2)} seconds\n(RK4)', font=("Arial", 30), height=1, width=15)
+                self.text_box3.config(text=f'Range (air resistance):\n{round(xr[-1], 2)} meters\n(RK4)', font=("Arial", 30), height=1, width=15)
+                self.text_box4.config(text=f'TOF (air resistance):\n{round(tr[-1], 2)} seconds\n(RK4)', font=("Arial", 30), height=1, width=15)
 
             if self.current_plot_subtype == 'y vs x':
 
