@@ -2,7 +2,7 @@ from manim import *
 
 import numpy as np
 
-class Task7(Scene):
+class Task8(Scene):
     def construct(self):
         # Parameters
         h = 10.0   # Initial height (m)
@@ -12,7 +12,7 @@ class Task7(Scene):
         dt = 1/25  # Time step (s)
         theta = 45.0  # Initial launch angle in degrees
         u = 20.0   # Initial speed of object in m/s
--
+
         def verlet_trajectory_solver(N, C, g, dt, h, theta, u):
             theta = np.deg2rad(theta)
             
@@ -58,7 +58,7 @@ class Task7(Scene):
             return t, x, y, vx, vy
 
         # Compute trajectory
-        t, x, y, vx, vy = verlet_trajectory_solver(N, C, g, dt, h, theta, u)
+        t, x, y, vx, vy = verlet_trajectory_solver(N-1, C, g, dt, h, theta, u)
         
         # Create axes
         axes = Axes(
@@ -83,7 +83,7 @@ class Task7(Scene):
 
         v_y_bounce_eq = MathTex(r"v_y^{\text{new}} = -C \cdot v_y")
 
-        verlet_text = Tex("'Verlet Integration'", color = RED).scale(0.8).to_corner(UR)
+        verlet_text = Tex("'Verlet Integration'", color = RED).scale(0.8).to_corner(UR).shift(LEFT)
 
         equations = VGroup(x_new_eq, y_new_eq, v_x_new_eq, v_y_new_eq, v_y_bounce_eq).arrange(DOWN, buff=0.3).scale(0.6).next_to(verlet_text, DOWN)
 

@@ -3,13 +3,16 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RadioButtons
 
 def k_factor(C_d, rho, cs_area, m):
-    return (0.5 * C_d * rho * cs_area) / m
+    return ((0.5 * C_d * rho * cs_area) / m)
 
 def with_air_resistance(v0, h, C_d, rho, cs_area, m, angle):
+
+    g = 9.81
 
     theta = np.deg2rad(angle)
 
     k = k_factor(C_d, rho, cs_area, m)
+    print(k)
     vx0 = v0 * np.cos(np.radians(angle))
     vy0 = v0 * np.sin(np.radians(angle))
     x, y, vx, vy, t = [0], [h], [vx0], [vy0], [0]
@@ -19,7 +22,7 @@ def with_air_resistance(v0, h, C_d, rho, cs_area, m, angle):
         t.append(t[-1] + dt)
         v = np.sqrt(vx[-1]**2 + vy[-1]**2)
 
-        ax = - (vx[-1] / v) * k * v**2
+        ax = -(vx[-1] / v) * k * v**2
         ay = -g - (vy[-1] / v) * k * v**2
 
         x.append(x[-1] + vx[-1] * dt + 0.5 * ax * dt**2)
@@ -31,6 +34,8 @@ def with_air_resistance(v0, h, C_d, rho, cs_area, m, angle):
     return x, y, v, vx, vy, t
 
 def without_air_resistance(v0, h, angle):
+    dt = 1/100
+    g = 9.81
     theta = np.radians(angle) 
     vx0 = v0 * np.cos(theta)
     vy0 = v0 * np.sin(theta)
@@ -51,15 +56,13 @@ def without_air_resistance(v0, h, angle):
 
     return x, y, v, vx, vy, t
    
-g = 9.81  # acceleration due to gravity (m/s^2)
-C_d = 0.1  # Drag coefficient
-rho = 1  # Air density (kg/m^3)
-cs_area = 0.007854  # Cross-sectional area (m^2)
-m = 0.1  # Object mass (kg)
-dt = 0.01  # Time step (s)
-v0 = 20  # Initial speed (m/s)
-angle = 30  # Launch angle (deg)
-h = 2 #Initial height
+v0 = 50  # initial speed (m/s)
+angle = np.rad2deg(np.pi / 4)  # launch angle (radians)
+rho = 1.225  # air density (kg/m^3)
+C_d = 0.47  # drag coefficient (dimensionless)
+cs_area = 0.01  # cross-sectional area (m^2)
+m = 10  # mass of the projectile (kg)
+h = 0
 
 xnr, ynr, vnr, vxnr, vynr, tnr  = without_air_resistance(v0, h, angle)
 xr, yr, vr, vxr, vyr, tr = with_air_resistance(v0, h, C_d, rho, cs_area, m, angle)

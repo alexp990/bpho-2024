@@ -1,8 +1,6 @@
 from manim import *
 import numpy as np
 
-"""Add axes: NO"""
-
 class Task1(Scene):
 
 
@@ -60,7 +58,7 @@ class Task1(Scene):
             axis_config={"color": BLUE},
         )
         axes.add_coordinates()
-        self.add(axes)
+        self.play(Create(axes))
 
         #Labels for initial conditions
         velocity_label = MathTex(r"u = 5.0 \, \text{m/s}").scale(0.7)
@@ -90,7 +88,7 @@ class Task1(Scene):
             add_vertex_dots=False
         )
 
-        self.play(Create(initial_path), Write(equations))
+        self.play(Write(initial_path), Write(equations))
 
         #self.wait(0.5)
 
@@ -127,7 +125,7 @@ class Task1(Scene):
             self.play(Transform(velocity_label, velocity_label_new), run_time=0.001)
             self.play(Transform(angle_label, angle_label_new), Transform(x_eq, x_eq_new), Transform(y_eq, y_eq_new), run_time=0.1)
 
-            self.play(Create(path), run_time=run_time)
+            self.play(Create(path), run_time=0.5)
             run_time = run_time / 2
 
         theta_vals.insert(0, theta_initial)
