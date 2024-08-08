@@ -95,7 +95,7 @@ class Task3(Scene):
         axes.to_corner(DL)
         axes.shift(RIGHT*0.2).shift(UP*0.2)
         axes.add_coordinates()
-        self.add(axes)
+        self.play(Create(axes))
 
         #Showing equations describing projectile motion
         u_eq = MathTex(

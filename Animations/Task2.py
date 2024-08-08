@@ -60,7 +60,7 @@ class Task2(Scene):
         )
         axes.scale(0.9)
         axes.add_coordinates()
-        self.add(axes)
+        self.play(Create(axes))
 
         #Labels for initial conditions
         init_labels_scale = 0.5
@@ -139,7 +139,7 @@ class Task2(Scene):
         u_vector_text.set_z_index(15)
         angle_text.set_z_index(4)
 
-        self.play(Create(initial_path), Create(u_vector), Create(angle), Write(u_vector_text), Write(angle_text), Create(line_for_angle_label), Create(range_brace), Write(range_brace_text), run_time=0.5)
+        self.play(Create(initial_path), Create(u_vector), Create(angle), Write(u_vector_text), Write(angle_text), Create(line_for_angle_label), Create(range_brace), Write(range_brace_text), run_time=0.7)
         self.play(Create(apogee_point), Write(apogee_point_text), run_time=0.5)
         self.wait(1)
         paths = []
