@@ -42,14 +42,20 @@ class Tasks:
 
         return x_positions, y_positions, range_
 
+
+
+
+
+
+
     #----------------------------Analytical Model------------------------
 
     def task2(self, h, u, theta, step, g):
 
         theta_rad = np.deg2rad(theta)
-        range = u**2/g * (np.sin(theta_rad)*np.cos(theta_rad) + np.cos(theta_rad)*np.sqrt(np.square(np.sin(theta_rad)) + (2*g*h)/(np.square(u))))
-        tof = range / (u * np.cos(theta_rad))
-        dx = range / step
+        range_ = u**2/g * (np.sin(theta_rad)*np.cos(theta_rad) + np.cos(theta_rad)*np.sqrt(np.square(np.sin(theta_rad)) + (2*g*h)/(np.square(u))))
+        tof = range_ / (u * np.cos(theta_rad))
+        dx = range_ / step
 
         x_a = (u**2 / g) * np.sin(theta_rad)*np.cos(theta_rad)
         y_a = h + (u**2 / (2 * g)) * ((np.sin(theta_rad))**2)
@@ -73,6 +79,10 @@ class Tasks:
         
         
         return np.array(x_positions), np.array(y_positions), x_a, y_a, tof, range
+
+
+
+
 
     #----------------------------To XY------------------------
 
@@ -159,11 +169,11 @@ class Tasks:
         theta_rad = np.deg2rad(theta)
         theta_rad_max_r = np.arcsin(1/(np.sqrt(2 + 2*g*h/u**2)))
 
-        range = u**2/g * (np.sin(theta_rad)*np.cos(theta_rad) + np.cos(theta_rad)*np.sqrt(np.square(np.sin(theta_rad)) + (2*g*h)/(np.square(u))))
+        range_ = u**2/g * (np.sin(theta_rad)*np.cos(theta_rad) + np.cos(theta_rad)*np.sqrt(np.square(np.sin(theta_rad)) + (2*g*h)/(np.square(u))))
         range_max = (u**2 / g) * (np.sqrt(1 + (2*g*h)/u**2))
 
-        tof = range / (u * np.cos(theta_rad))
-        dx = range / step
+        tof = range_ / (u * np.cos(theta_rad))
+        dx = range_ / step
 
         tof_max_r = range_max / (u * np.cos(theta_rad_max_r))
         dx_max_r = range_max / step
@@ -209,6 +219,9 @@ class Tasks:
         return np.array(x_positions), np.array(y_positions), np.array(x_positions_max_range), np.array(y_positions_max_range), x_a, y_a, x_a_max_r, y_a_max_r, range, range_max, tof, tof_max_r, theta, np.rad2deg(theta_rad_max_r)
 
 
+
+    #----------------------------Maximum Range Surface Plots------------------------
+
     def task4_surface_plots(self):
 
         def projectile_motion(h, u, g=9.81):
@@ -243,6 +256,12 @@ class Tasks:
 
 
         return max_range, launch_elevation, Rg_u2_values, alpha_values, h_values, theta_values, u_values, Rg_u2_theta_values, alpha_values
+
+
+
+
+
+
 
     #----------------------------Bounding Parabola to XY------------------------
 
@@ -387,6 +406,10 @@ class Tasks:
     
         return s
 
+
+
+
+
     #----------------------------Min Max Range Graph------------------------
        
     class Task7:
@@ -420,6 +443,10 @@ class Tasks:
             x = u * t * np.cos(theta)
             y = u * t * np.sin(theta) - 0.5 * g * t**2
             return x, y
+
+
+
+            
 
 
     #----------------------------Verlet Trajectory Solver------------------------
