@@ -1,13 +1,33 @@
-\documentclass[12pt]{article}
+\documentclass[14]{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{minted}
 \usepackage{subfig}
+\usepackage{biblatex}
 \newcommand{\bs}[1]{\boldsymbol{#1}}
 \newcommand{\om}{\omega}
 \title{Projectiles}
+
+\begin{filecontents}{references.bib}
+@book{morin2008,
+  author = {Morin, David},
+  title = {Introduction to Classical Mechanics: With Problems and Solutions},
+  year = {2008},
+  publisher = {Cambridge University Press},
+  address = {Cambridge, UK}
+}
+
+@misc{cline2021,
+  author = {David Cline},
+  title = {Effective gravitational force near the surface of the Earth},
+  year = {2021},
+  howpublished = {\url{https://phys.libretexts.org/Bookshelves/Classical_Mechanics/Variational_Principles_in_Classical_Mechanics_(Cline)/12\%3A_Non-inertial_Reference_Frames/12.10\%3A_Effective_gravitational_force_near_the_surface_of_the_Earth}},
+}
+\end{filecontents}
+\addbibresource{references.bib}
+
 
 
 \begin{document}
@@ -19,22 +39,22 @@ This paper presents a derivation of the equations of motion for a projectile lau
 \section{Fictitious Forces}
 Points in a rotating planet frame has a nonzero acceleration, so there will be fictitious forces that we have to take into consideration. Let the angular velocity of the planet be $\bs{\om}$ and origin be the centre of the planet. An object at position $\bs{r}$ and velocity $v_r$ (in the rotating frame) will have a net velocity of 
 \begin{equation} \frac{d\bs{r}}{dt} = \bs{v_n} + \bs{\om} \times \bs{r} \end{equation}
-The acceleration can be determined by taking the time derivative of $\left(1\right)$
-\begin{equation} 
-\begin{aligned}[b]
-\frac{d^2\bs{r}}{dt^2} &= \frac{d}{dt}\left(\bs{v_r} + \bs{\om} \times \bs{r}\right)\\
-& = \frac{d\bs{v_r}}{dt} + \bs{\om} \times \bs{v_r} \frac{d\bs{\om}}{dt} \times \bs{r} + \bs{\om} \times \bs{v_r}\\
-& = \bs{a_r} +  2\bs{\om} \times \bs{v_r} + \bs{\om} \times \left(\bs{\om} \times \bs{r}\right) + \dot{\bs{\om}} \times \bs{r}
+The acceleration can be determined by taking the time derivative of Equation $1$
+\begin{equation}
+\begin{aligned}
+\frac{d^2\bs{r}}{dt^2} &= \frac{d}{dt}\left(\bs{v_r} + \bs{\om} \times \bs{r}\right) \\
+&= \frac{d\bs{v_r}}{dt} + \frac{d\bs{\om}}{dt} \times \bs{r} + \bs{\om} \times \frac{d\bs{r}}{dt} \\
+&= \bs{a_r} + 2\bs{\om} \times \bs{v_r} + \bs{\om} \times (\bs{\om} \times \bs{r}) + \dot{\bs{\om}} \times \bs{r}
 \end{aligned}
 \end{equation}
 By applying Newton's Second Law in the rotating frame, we derive four forces:
 \begin{center}
 \begin{equation}\text{Translational Force: } \bs{F_{tr}} = -m\bs{a_r}\end{equation}
-\begin{equation}\text{Centrifugal Force: } \bs{F_{cf}} = -m\bs{\om} \times \left(\bs{\om} \times \bs{r}\right)\end{equation}
+\begin{equation}\text{Centrifugal Force: } \bs{F_{cf}} = -m\bs{\om} \times (\bs{\om} \times \bs{r})\end{equation}
 \begin{equation}\text{Coriolis Force: } \bs{F_{co}} = -2m\bs{\om} \times \bs{v_r}\end{equation}
-\begin{equation}\text{Euler Force: } \bs{F_{eu}} = -m\dot{\bs{\om}} \times \bs{r}\end{equation}
+\begin{equation}\text{Azimuthal Force: } \bs{F_{az}} = -m\dot{\bs{\om}} \times \bs{r}\end{equation}
 \end{center}
-We will assume that the planet is rotating at a constant velocity, so the Euler Force does not need to be considered. There also isnt any Translational Force as the planet is stationary.\\
+We will assume that the planet is rotating at a constant velocity, so the Azimuthal Force does not need to be considered. There also isnt any Translational Force as the planet is stationary.\\
 For simplicity, let the axis of rotation $\bs{\hat{\om}}$ lie on the $\bs{z}$ axis. The centrifugal and coriolis force can then be written as 
 \begin{equation} \bs{F_{cf}} = -m\om^2x\bs{\hat{x}} - m\om^2y\bs{\hat{y}} \end{equation}
 \begin{equation} \bs{F_{co}} = 2m\om\dot{y}\bs{\hat{x}} - 2m\om\dot{x}\bs{\hat{y}}\end{equation}
@@ -44,72 +64,98 @@ The Gravitational Force is described by Newton's Law of Universal Gravitation
 \begin{equation}
 \begin{aligned}[b]
 \bs{F_g} &= -\frac{GMm}{r^2}\bs{\hat{r}}\\
-&= -\frac{GMm}{\left(x^2+y^2+z^2\right)^{3/2}}\bs{r}\\
-&= -\frac{GMmx}{\left(x^2+y^2+z^2\right)^{3/2}}\bs{\hat{x}} -\frac{GMmy}{\left(x^2+y^2+z^2\right)^{3/2}}\bs{\hat{y}} -\frac{GMmz}{\left(x^2+y^2+z^2\right)^{3/2}}\bs{\hat{z}}\\
+&= -\frac{GMm}{(x^2+y^2+z^2)^{3/2}}\bs{r}\\
+&= -\frac{GMmx}{(x^2+y^2+z^2)^{3/2}}\bs{\hat{x}} -\frac{GMmy}{(x^2+y^2+z^2)^{3/2}}\bs{\hat{y}} -\frac{GMmz}{(x^2+y^2+z^2)^{3/2}}\bs{\hat{z}}\\
 \end{aligned}
 \end{equation}
-where $\bs{r} \equiv \left(x, y, z\right)$, $M$ is the mass of the planet, $m$ is the mass of the projectile and $G$ is the gravitational constant.\\
+where $\bs{r} \equiv (x, y, z)$, $M$ is the mass of the planet, $m$ is the mass of the projectile and $G$ is the gravitational constant.\\
 \\
-The Drag Force is described by Newton's Drag Equation quatratic drag)
+The Drag Force is described by Newton's Drag Equation (quadratic drag)
 \begin{equation}
 \begin{aligned}[b]
-\bs{F_d} &= -\frac{1}{2}C_d\rho\left(r\right)Av^2\bs{\hat{v}}\\
-&= -\frac{1}{2}C_d\rho\left(r\right)Av\bs{v}\\
-&= -\frac{1}{2}C_d\rho\left(r\right)Av\dot{x}\bs{\hat{x}} - \frac{1}{2}C_d\rho\left(r\right)Av\dot{y}\bs{\hat{y}} - \frac{1}{2}C_d\rho\left(r\right)Av\dot{z}\bs{\hat{z}}
+\bs{F_d} &= -\frac{1}{2}C_d\rho(r)Av^2\bs{\hat{v}}\\
+&= -\frac{1}{2}C_d\rho(r)Av\bs{v}\\
+&= -\frac{1}{2}C_d\rho(r)Av\dot{x}\bs{\hat{x}} - \frac{1}{2}C_d\rho(r)Av\dot{y}\bs{\hat{y}} - \frac{1}{2}C_d\rho(r)Av\dot{z}\bs{\hat{z}}
 \end{aligned}
 \end{equation}
-where $C_d$ is the drag coefficient, $A$ is the corss-sectional area, $\rho\left(r\right)$ is the density of air at altitude $r$ and $\bs{v} \equiv \left(\dot{x}, \dot{y}, \dot{z}\right)$.
+where $C_d$ is the drag coefficient, $A$ is the corss-sectional area, $\rho(r)$ is the density of air at altitude $r$ and $\bs{v} \equiv (\dot{x}, \dot{y}, \dot{z})$.
 
 
 \section{Atmospheric Density}
-To simplify the model, we will assume that temperature is constant over all space. The atmosphere will also be assumed to be comprised of only air, which is considered as an ideal gas. Therefore, it obeys the Ideal Gas Law
+To simplify the model, we will assume that temperature is constant over all space. The atmosphere will also be assumed to be comprised of only dry air, which is considered as an ideal gas. Therefore, it obeys the Ideal Gas Law:
 \begin{equation}
-PV=nRT \iff P=\frac{\rho R^*T}{M}
+PV=nR^*T \iff P=\rho R^*T
 \end{equation}
-Since the planet is rotating, we have to account for the centrifugal force to find the effective gravity
+Since the planet is rotating, we have to account for the centrifugal force to find the effective gravity:
 \begin{equation}
 \begin{aligned}[b]
-g_{eff}\left(h, \phi\right) &= g\left(h\right) - |\bs{\om} \times \left(\bs{\om} \times \bs{R}\right)|\\
-&\approx \frac{GM}{\left(R+h\right)^2} - \om^2R\cos^2\phi
+g_{\text{eff}}(h, \phi) &= g(h) - |\bs{\om} \times (\bs{\om} \times \bs{R})|\\
+&\approx \frac{GM}{(R+h)^2} - \omega^2(R+h)\cos^2\phi
 \end{aligned}
 \end{equation}
-where $\phi$ is the latitude.The approximation is due to the fact that $\bs{g_{eff}}$ also has a small tangential component, which can be ignored as long as $h \ll R$.\\
-Air satisfies hydrostatic equilibrium and the ideal gas law\footnote{note that $R^*$ is the specific gas constant and $R$ is the radius of the planet}, so
+where $\phi$ is the latitude. The approximation is due to the fact that $g_{\text{eff}}$ also has a small tangential component, which can be ignored as long as $h \ll R$.\\
+Air satisfies hydrostatic equilibrium and the ideal gas law\footnote{Note that $R^*$ is the specific gas constant and $R$ is the radius of the planet}, so
 \begin{equation}
-\frac{dP}{dh} = -\rho g_{eff} = -\frac{P}{R^*T}\left(\frac{GM}{\left(R+h\right)^2} - \om^2R\cos^2\phi\right)
+\frac{dP}{dh} = -\rho g_{\text{eff}} = -\frac{P}{R^*T}\left(\frac{GM}{(R+h)^2} - \omega^2(R+h)\cos^2\phi\right)
 \end{equation}
-This differential equation can be solved by separation of variables
+This differential equation can be solved by separation of variables:
 \begin{equation*}
-\frac{dP}{P} = -\frac{1}{R^*T}\left(\frac{GM}{\left(R+h\right)^2} - \om^2R\cos^2\phi\right) dh
+\frac{dP}{P} = -\frac{1}{R^*T}\left(\frac{GM}{(R+h)^2} - \omega^2(R+h)\cos^2\phi\right) dh
 \end{equation*}
-Integrating both sides,
+Integrating both sides from the surface ($h = 0$) to an altitude $h$,
 \begin{equation*}
-\int \frac{dP}{P} = -\frac{1}{R^*T}\int \frac{GM}{\left(R+h\right)^2} -\om^2R\cos^2\phi dh
-\end{equation*}
-\begin{equation*}
-\implies \ln{P} = -\frac{1}{R^*T} \left(\int \frac{GM}{\left(R+h\right)^2} dh - \int \om^2R\cos^2\phi dh\right) + C
-\end{equation*}
-Solving each integral
-\begin{equation*}
-\int \frac{GM}{\left(R+h\right)^2} dh = GM \int \frac{1}{\left(R+h\right)^2} dh = -\frac{GM}{R+h}
+\int_{P_0}^{P(h, \phi)} \frac{dP}{P} = -\frac{1}{R^*T} \left(\int_0^h \frac{GM}{(R+h')^2} \, dh' - \int_0^h \omega^2 (R+h')\cos^2\phi \, dh'\right)
 \end{equation*}
 \begin{equation*}
-\int \om^2R\cos^2\phi dh =  \om^2Rh\cos^2\phi
+\implies \ln\left(\frac{P(h, \phi)}{P_0}\right) = -\frac{GM}{R^*T} \left(\frac{1}{R} - \frac{1}{R+h}\right) + \frac{\omega^2 \cos^2\phi}{R^*T} \left(Rh + \frac{h^2}{2}\right)
 \end{equation*}
-and substituting them back in
-\begin{equation*}
-    \ln{P} = \frac{GM}{R^*T\left(R+h\right)} + \frac{\om^2Rh\cos^2\phi}{R^*T} + C
-\end{equation*}
-and exponentiating both sides and defining $P_0 \equiv e^C$
+Exponentiating both sides:
 \begin{equation}
-P\left(h\right) = P_0 \exp\left(\frac{GM}{R^*T\left(R+h\right)} + \frac{\om^2Rh\cos^2\phi}{R^*T}\right)
+P(h, \phi) = P_0 \exp\left[-\frac{GM}{R^*T} \left(\frac{1}{R} - \frac{1}{R+h}\right) + \frac{\omega^2 \cos^2\phi}{R^*T} \left(Rh + \frac{h^2}{2}\right)\right]
 \end{equation}
-we find the formula for pressure at an altitude $h$. The ideal gas law can be used one last time to find density in terms of $h$
+we find the formula for pressure at an altitude $h$ and latitude $\phi$. The ideal gas law can be used one last time to find density in terms of $h$ and $\phi$:
 \begin{equation}
-\rho\left(h\right) = \rho_0 \exp\left(\frac{GM}{R^*T\left(R+h\right)} + \frac{\om^2Rh\cos^2\phi}{R^*T}\right)
+\rho(h, \phi) = \rho_0 \exp\left[-\frac{GM}{R^*T} \left(\frac{1}{R} - \frac{1}{R+h}\right) + \frac{\omega^2 \cos^2\phi}{R^*T} \left(Rh + \frac{h^2}{2}\right)\right]
+\end{equation}
+This model suggests that the atmospheric density increases exponetially for all $h$, which is not very realistic. This is due to the fact that once the effective gravity $g_{\text{eff}} < 0$, the atmosphere does not obey hydrostatic equilibrium anymore. However, we will still be using a modified version of the hydrostatic equilibrium equation:
+\begin{equation}
+\frac{dP}{dh} = -\rho|g_{\text{eff}}|
+\end{equation}
+This equation can be solved in a similar fasion
+\begin{equation*}
+P(h) = P(h_c) \exp\left[-\int^h_{h_c} \frac{g_{\text{eff}}(h', \phi)}{R^*T} \, dh'\right], \qquad g_{\text{eff}}(h_c, \phi) = 0
+\end{equation*}
+\begin{align}
+P(h) = P(h_c)\exp\Bigg[& \frac{GM}{R^*T} \left(\frac{1}{R + h_c} - \frac{1}{R+h}\right) \notag \\
+& - \frac{\omega^2 \cos^2\phi}{R^*T} \left(\frac{(R+h)^2}{2} - \frac{(R+h_c)^2}{2}\right) \Bigg]
+\end{align}
+Then pressure can then be replaced with density
+\begin{equation}
+\footnotesize
+\rho(h) = \rho(h_c)\exp\left[\frac{GM}{R^*T} \left(\frac{1}{R + h_c} - \frac{1}{R+h}\right) - \frac{\omega^2 \cos^2\phi}{R^*T} \left(\frac{(R+h)^2}{2} - \frac{(R+h_c)^2}{2}\right)\right]
 \end{equation}
 
+\section{Conclusion}
+The full equations of motion for the projectile are listed out below:
+\begin{equation}
+\ddot{x} = -\frac{GMx}{(x^2 + y^2 + z^2)^{3/2}} + 2\omega \dot{y} - \omega^2 x - \frac{C_d \rho(r - R) A \dot{x} v}{2m}
+\end{equation}
+
+\begin{equation}
+\ddot{y} = -\frac{GMy}{(x^2 + y^2 + z^2)^{3/2}} - 2\omega \dot{x} - \omega^2 y - \frac{C_d \rho(r - R) A \dot{y} v}{2m}
+\end{equation}
+
+\begin{equation}
+\ddot{z} = -\frac{GMz}{(x^2 + y^2 + z^2)^{3/2}} - \frac{C_d \rho(r - R) A \dot{z} v}{2m}
+\end{equation}
+
+Where $v = \sqrt{\dot{x}^2 + \dot{y}^2 + \dot{z}^2}$ is the speed of the projectile and
+$\rho(h)$ is the atmospheric density at altitude $h$.
 
 
-
+\nocite{*}
+\printbibliography[
+heading=bibintoc,
+title={References}
+]
 \end{document}
