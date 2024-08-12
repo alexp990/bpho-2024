@@ -88,7 +88,7 @@ class Task1(Scene):
             add_vertex_dots=False
         )
 
-        self.play(Write(initial_path), Write(equations))
+        self.play(Write(initial_path), Write(equations), run_time=1)
 
         #self.wait(0.5)
 
@@ -125,8 +125,7 @@ class Task1(Scene):
             self.play(Transform(velocity_label, velocity_label_new), run_time=0.001)
             self.play(Transform(angle_label, angle_label_new), Transform(x_eq, x_eq_new), Transform(y_eq, y_eq_new), run_time=0.1)
 
-            self.play(Create(path), run_time=0.5)
-            run_time = run_time / 2
+            self.play(Create(path), run_time=0.2)
 
         theta_vals.insert(0, theta_initial)
 
@@ -228,10 +227,10 @@ class Task1(Scene):
             Write(vy_label),
             Write(v_label),
             Transform(vx_eq, vx_eq_new), Transform(vy_eq, vy_eq_new), Transform(v_eq, v_eq_new),
-            run_time=0.7
+            run_time=0.4
         )
 
-        self.wait(2)
+        self.wait(0.8)
 
 
 #Renders scene
