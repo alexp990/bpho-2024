@@ -868,10 +868,6 @@ class PlotApp:
                 self.ax.set_title('Max Range (m)', fontsize=28)
                 self.ax.set_xlabel('Initial Velocity u (m/s)', fontsize=22)
                 self.ax.set_ylabel('Initial Height h (m)', fontsize=22)
-                """if not self.once:
-                    self.cb = self.fig.colorbar(im1, ax=self.ax)
-                    self.once = True
-                    print(self.once)"""
 
             elif self.current_plot_subtype == 'launch elevation surface graph':
 
@@ -881,9 +877,6 @@ class PlotApp:
                 self.ax.set_title('Theta (degrees)', fontsize=28)
                 self.ax.set_xlabel('Initial Velocity u (m/s)', fontsize=22)
                 self.ax.set_ylabel('Initial Height h (m)', fontsize=22)
-                """if not self.once:
-                    self.cb = self.fig.colorbar(im2, ax=self.ax)
-                    self.once = True"""
 
             elif self.current_plot_subtype == 'Rg/u^2 graph':
 
@@ -893,9 +886,6 @@ class PlotApp:
                 self.ax.set_title('Rg/u²', fontsize=28)
                 self.ax.set_xlabel('Initial Velocity u (m/s)', fontsize=22)
                 self.ax.set_ylabel('Initial Height h (m)', fontsize=22)
-                """if not self.once:
-                    self.cb = self.fig.colorbar(im3, ax=self.ax)
-                    self.once = True"""
 
             elif self.current_plot_subtype == 'alpha graph':
 
